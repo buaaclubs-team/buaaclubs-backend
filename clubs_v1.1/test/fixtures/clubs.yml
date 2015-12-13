@@ -1,0 +1,16 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: 凌峰社
+  password: 123456
+  introduction: 凌峰社是一个社团
+  club_account: lingfengshe
+  log_num: 123456
+  head_url: aaaaaaaaa
+two:
+  name: 早早社
+  password: 123456
+  introduction: 早早社是一个社团
+  club_account: zaozaoshe
+  log_num: 123456
+  head_url: aaaaaaaaaa

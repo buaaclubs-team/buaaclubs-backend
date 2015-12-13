@@ -1,0 +1,10 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  content: 我家在黄土高坡
+  user_id: 980190962
+  article_id: 980190962
+two:
+  content: 摸摸头不哭鬼
+  user_id: 2
+  article_id: 2

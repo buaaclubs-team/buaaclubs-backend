@@ -1,0 +1,12 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: 欢迎大家
+  abstract: 赶紧参加吧
+  content: 我们去打老虎
+  club_id: 980190962
+two:
+  title: 今日出航
+  abstract: 想着远方
+  content: 走到地球的另一边
+  club_id: 980190962
