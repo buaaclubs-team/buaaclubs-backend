@@ -11,66 +11,91 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151116151338) do
+ActiveRecord::Schema.define(version: 20151213125942) do
+
+  create_table "applications", force: :cascade do |t|
+    t.integer  "user_id",    limit: 4
+    t.integer  "club_id",    limit: 4
+    t.string   "reason",     limit: 255
+    t.integer  "accept",     limit: 4
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
 
   create_table "articles", force: :cascade do |t|
-    t.integer  "club_id"
-    t.string   "title"
-    t.string   "abstract"
-    t.string   "content"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.integer  "club_id",    limit: 4
+    t.string   "title",      limit: 255
+    t.string   "abstract",   limit: 255
+    t.string   "content",    limit: 255
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
-  add_index "articles", ["title"], name: "index_articles_on_title", unique: true
+  add_index "articles", ["title"], name: "index_articles_on_title", unique: true, using: :btree
 
   create_table "articles_users", id: false, force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "article_id"
+    t.integer "user_id",    limit: 4
+    t.integer "article_id", limit: 4
   end
 
-  add_index "articles_users", ["user_id", "article_id"], name: "index_articles_users_on_user_id_and_article_id", unique: true
+  add_index "articles_users", ["user_id", "article_id"], name: "index_articles_users_on_user_id_and_article_id", unique: true, using: :btree
 
   create_table "clubs", force: :cascade do |t|
-    t.string   "name"
-    t.string   "password"
-    t.string   "introduction"
-    t.string   "head_url"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
-    t.integer  "log_num"
-    t.string   "club_account"
+    t.string   "name",         limit: 255
+    t.string   "password",     limit: 255
+    t.string   "introduction", limit: 255
+    t.string   "head_url",     limit: 255
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
+    t.integer  "log_num",      limit: 4
+    t.string   "club_account", limit: 255
   end
 
-  add_index "clubs", ["club_account"], name: "index_clubs_on_club_account", unique: true
+  add_index "clubs", ["club_account"], name: "index_clubs_on_club_account", unique: true, using: :btree
 
-  create_table "clubs_users", id: false, force: :cascade do |t|
-    t.integer "club_id"
-    t.integer "user_id"
+  create_table "clubs_users", force: :cascade do |t|
+    t.integer "user_id", limit: 4
+    t.integer "club_id", limit: 4
+  end
+
+  create_table "informs", force: :cascade do |t|
+    t.integer  "club_id",    limit: 4
+    t.string   "users",      limit: 255
+    t.string   "content",    limit: 255
+    t.integer  "type",       limit: 4
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
+  create_table "lists", force: :cascade do |t|
+    t.integer  "user_id",    limit: 4
+    t.integer  "club_id",    limit: 4
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
   end
 
   create_table "notes", force: :cascade do |t|
-    t.integer  "user_id"
-    t.integer  "article_id"
-    t.string   "content"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.integer  "user_id",    limit: 4
+    t.integer  "article_id", limit: 4
+    t.string   "content",    limit: 255
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
-  add_index "notes", ["user_id", "article_id"], name: "index_notes_on_user_id_and_article_id", unique: true
+  add_index "notes", ["user_id", "article_id"], name: "index_notes_on_user_id_and_article_id", unique: true, using: :btree
 
   create_table "users", force: :cascade do |t|
-    t.string   "stu_num"
-    t.string   "name"
-    t.string   "password"
+    t.string   "stu_num",    limit: 255
+    t.string   "name",       limit: 255
+    t.string   "password",   limit: 255
     t.string   "phone_num",  limit: 11
-    t.datetime "created_at",            null: false
-    t.datetime "updated_at",            null: false
-    t.integer  "log_num"
-    t.string   "user_head"
-    t.string   "email"
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+    t.integer  "log_num",    limit: 4
+    t.string   "user_head",  limit: 255
+    t.string   "email",      limit: 255
   end
 
-  add_index "users", ["stu_num"], name: "index_users_on_stu_num", unique: true
+  add_index "users", ["stu_num"], name: "index_users_on_stu_num", unique: true, using: :btree
 
 end

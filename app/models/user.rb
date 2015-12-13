@@ -1,5 +1,5 @@
 class User < ActiveRecord::Base
- # has_and_belongs_to_many :clubs
+#  has_and_belongs_to_many :clubs
   has_many :notes, inverse_of: :user,dependent: :destroy
   has_many :articles, through: :notes
 
@@ -9,6 +9,12 @@ class User < ActiveRecord::Base
 #  validate :stu_num_is_eight
  # validates :password, length: {in: 6..20}
  # validates :stu_num, format: {with: /([0-9]){8}/}
+
+  has_many :applications, inverse_of: :user, dependent: :destroy
+  has_many :wantedclubs, class_name: 'Club',through: :applications
+
+  has_many :lists, inverse_of: true, dependent: :destroy
+  has_many :clubs, through: :lists
 '''
  def stu_num_is_eight
      if stu_num.to_s.size != 8

@@ -4,7 +4,114 @@ class ClubsController < ApplicationController
   skip_before_action :require_user_login
   skip_before_action :require_club_login, only: [:login, :getabstracts]
   before_action :set_club, only: [:show, :edit, :update, :destroy]
-  
+
+
+  def memberslist
+        m = []
+        @club = Club.where(club_account: request.headers[:uid]).take
+        if @club.nil?
+           render text: 'Club not exit',status: 404
+        end
+        @members = @club.members
+        num = @members.length - 1
+        (0..num).each{|t| m<<{:uid => @members[t].stu_num,
+                              :name => @members[t].name,
+                              :phone_num => @members[t].phone_num,
+                              :email => @members[t].email,
+                              :user_head => @members[t].user_head,
+                              :time => List.where({club_id: @club.id,user_id: @members[t].id}).take.created_at}}
+        respond_to do |format|
+         format.html { render :json=>{:txt => m}.to_json }
+        end
+  end  
+
+  def forcequit
+        @club = Club.where(club_account: request.headers[:uid]).take
+        if @club.nil?
+           render text: 'Club not exit',status: 404
+        end
+ 	suc = false
+        @members_id = JSON.parse(request.body.string)
+        @members_id["uids"].each{|temp_id|
+                                 member = User.find_by stu_num: temp_id
+                                 find = false
+                                 @club.lists.each{|temp_note| if temp_note.user_id == member.id
+              							 find = true                                                                  
+  								 temp_note.destroy
+								 end}
+                                 if !find
+                                    suc = true
+                                    render text: 'Member not exit',status: 404
+                                 end
+                                }
+        if !suc
+           render text: 'success',status: 200
+        end
+  end
+
+  def applicationlist#获取申请人列表，注意是还没有处理的申请人列表
+	apps = []
+	@club = Club.where(club_account: request.headers[:uid]).take
+        if @club.nil?
+           render text: 'Club not exit',status: 404
+        end
+	@applicants = @club.applicants
+        num = @applicants.length - 1
+        (0..num).each{|t| if Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).length < 2
+                                apps << {:uid => @applicants[t].stu_num,
+                                      :name => @applicants[t].name,
+                                      :user_head => @applicants[t].user_head,
+                                      :time => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.created_at
+ 				      :reason => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.reason}
+                          end
+                     }
+        respond_to do |format|
+         	format.html { render :json=>{:txt => apps}.to_json }
+        end
+
+  end
+
+  def acceptapplication
+	@club = Club.where(club_account: request.headers[:uid]).take
+        if @club.nil?
+           render text: 'Club not exit',status: 404
+        end
+	if User.find(params[:user_id].to_i).nil?
+	   render text: 'User not exit',status: 404
+        end
+        if List.where(club_id: @club.id,user_id: params[:user_id].to_i).take.nil?
+           render text: 'the person already one of club',status: 404
+        end
+        @Application = Application.where({club_id: @club.id,user_id: params[:user_id].to_i,accept: nil}).take
+        if @Application,nil?
+           render text: 'Application not exist',status: 404
+        end
+	@Application.accept = 1
+        @Application.save
+        @list = List.new
+        @list.user_id = params[:user_id].to_i
+	@list.club_id = @club.id
+ 	@list.save
+        render text: 'success',status: 200
+  end
+  def refuseapplication
+	@club = Club.where(club_account: request.headers[:uid]).take
+        if @club.nil?
+           render text: 'Club not exit',status: 404
+        end
+        if User.find(params[:user_id].to_i).nil?
+           render text: 'User not exit',status: 404
+        end
+        @Application = Application.where({club_id: @club.id,user_id: params[:user_id].to_i,accept: nil}).take
+        if @Application,nil?
+           render text: 'Application not exist',status: 404
+        end
+        @Application.accept = 0
+	@Application.save
+        render text: 'success',status: 200
+
+
+  end
 # POST 
   def sendemail
 	@club = Club.where(club_account: request.headers[:uid]).take.name

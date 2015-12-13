@@ -1,4 +1,18 @@
 Rails.application.routes.draw do
+
+  resources :lists
+  get '/api/clubs/members/all' => 'clubs#memberslist'#获取社团名单
+  #发送通知
+  #导出名单
+  post '/api/clubs/members/forcequit' => 'clubs#forcequit' #强制退社
+  get '/api/clubs/members/apply' => 'clubs#applicantlist' #申请人列表
+  get '/api/clubs/members/apply/accept/:user_id' => 'clubs#acceptapplication'#同意申请
+  get '/api/clubs/member/apply/refuse/:user_id' => 'clubs#refuseapplication'#拒绝申请  
+
+  resources :informs
+  resources :applications
+
+
   post '/api/clubs/sendmessage' => 'clubs#sendmessage'
   post '/api/clubs/sendemail' => 'clubs#sendemail'
   get '/api/users/register/check/:uid' => 'user#checkuid'

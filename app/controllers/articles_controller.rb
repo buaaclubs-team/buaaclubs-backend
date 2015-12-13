@@ -13,11 +13,11 @@ class ArticlesController < ApplicationController
        render text: 'Article not exist', status: 404 
     end
     suc = false
-    puts "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7"
-    puts request.body.string
-    puts JSON.parse(request.body.string)
-    puts  @users_id["uids"]
-    puts "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+#    puts "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7"
+    #puts request.body.string
+   # puts JSON.parse(request.body.string)
+  #  puts  @users_id["uids"]
+ #   puts "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
     @users_id = JSON.parse(request.body.string)
     puts  @users_id["uids"]
     @users_id["uids"].each{|temp_id|
