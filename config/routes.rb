@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   resources :lists
   get '/api/clubs/members/all' => 'clubs#memberslist'#获取社团名单
   #发送通知
-  #导出名单
+  post 'api/clubs/users/export' => 'clubs#exportlist' #导出名单
   post '/api/clubs/members/forcequit' => 'clubs#forcequit' #强制退社
   get '/api/clubs/members/apply' => 'clubs#applicantlist' #申请人列表
   get '/api/clubs/members/apply/accept/:user_id' => 'clubs#acceptapplication'#同意申请
