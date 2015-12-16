@@ -13,8 +13,8 @@ Rails.application.routes.draw do
   resources :applications
 
 
-  post '/api/clubs/sendmessage' => 'clubs#sendmessage'
-  post '/api/clubs/sendemail' => 'clubs#sendemail'
+  #post '/api/clubs/sendmessage' => 'clubs#sendmessage'
+  #post '/api/clubs/sendemail' => 'clubs#sendemail'
   get '/api/users/register/check/:uid' => 'user#checkuid'
   post '/api/register' => 'users#register'
   post '/api/clubs/login' => 'clubs#login'
@@ -25,7 +25,12 @@ Rails.application.routes.draw do
   get '/api/users/logout' => 'users#logout'
   get '/api/clubs/logout' => 'clubs#logout'
   post '/api/clubs/inform' => 'clubs#inform'  
- 
+  post '/api/clubs/articles/:article_id/comments/reply/:reply_id' => 'clubs#reply' 
+  post '/api/users/articles/:article_id/comments/reply/:reply_id' => 'users#reply'  
+  post '/api/users/webmails/readall' => 'users#readall'
+  post '/api/clubs/webmails/readall' => 'clubs#readall'
+
+
   post '/api/clubs/articles/detail/create' => 'articles#create'
 #  post '/api/clubs/articles/detail/:article_id/create_content' => 'articles#create_content'
   post '/api/clubs/articles/detail/:article_id/change' => 'articles#show'
