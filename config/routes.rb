@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   get '/api/clubs/:uid/articles/:page_id' => 'clubs#getabstracts'
   get '/api/users/logout' => 'users#logout'
   get '/api/clubs/logout' => 'clubs#logout'
+  post '/api/clubs/inform' => 'clubs#inform'  
  
   post '/api/clubs/articles/detail/create' => 'articles#create'
 #  post '/api/clubs/articles/detail/:article_id/create_content' => 'articles#create_content'
