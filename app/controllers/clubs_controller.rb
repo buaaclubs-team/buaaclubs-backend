@@ -305,7 +305,7 @@ class ClubsController < ApplicationController
       blue = Spreadsheet::Format.new :color => :blue, :weight => :bold, :size => 10
       sheet1.row(0).default_format = blue
    
-      sheet1.row(0).concat %w{学号 姓名 身份证号 邮箱}
+      sheet1.row(0).concat %w{学号 姓名 手机号 邮箱}
       count_row = 1
       objs.each do |obj|
          sheet1[count_row,0] = obj.stu_num
