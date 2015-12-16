@@ -36,6 +36,48 @@ class UsersController < ApplicationController
     end
   end
 
+   def inform
+    @webmail = Webmail.new
+    @club = Club.find_by club_account: params[:club_id]
+    @user = User.find_by stu_num: request.headers[:uid]
+    @webmail.sender_id = -1
+    @webmail.sender_name = "system"
+    @webmail.receiver_id = @club.id
+    @webmail.receiver_type = 1
+    @webmail.content = @user.stu_num + "quit your club!"
+    @webmail.ifread = 0
+   end
+
+   #POST /api/users/clubs/articles/:article_id/comments/reply/:reply_id
+   def reply
+    if params[:reply_id].to_i==-1
+       render nothing: true, status: 404
+    end
+    @user = User.find_by stu_num: request.headers[:uid]
+    @content = JSON.parse(request.body.string)
+    @webmail = Webmail.new
+    @webmail.sender_id =  -1
+    @webmail.sender_name = "system"
+    @comment =  Comment.find_by sender_id: params[:reply_id]
+    @webmail.receiver_id = @comment.sender_id
+    @webmail.receiver_type = 0
+    @webmail.content = @comment.title + " " + @comment.id + "" + @information + " " + @user.stu_num
+    @webmail.ifread = 0
+    render nothing: true, status: 200
+  end
+
+  #POST /api/users/webmails/readall
+  def readall
+    @user = User.find_by stu_num: request.headers[:uid]
+    
+    Webmail.all.each do |webmail|
+       if webmail.receiver_id == @user.stu_num && webmail.if_read
+          webmail.show
+          webmail.if_read=1;
+       end
+    end
+  end 
+
   # POST /api/users/login
   def login
 #    @user = User.find_by stu_num: env["HTTP_UID"].to_i

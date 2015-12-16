@@ -178,6 +178,95 @@ class ClubsController < ApplicationController
       puts messagexsend.message_xsend()}
 	render nothing: true, status: 200
   end
+
+  # POST /api/clubs/infrom
+  def inform
+    @club = Club.find_by club_account: request.headers[:uid]
+    @content = JSON.parse(request.body.string)
+    @information = @content["content"]
+    kind =  @content["type"].to_i
+    @inform = Inform.new
+    @inform.content = @information
+    if kind==0 
+      @inform.type = 0
+      @inform.club_id = @club.id
+      @content["uids"].each{|uid|
+        @inform.concat(uid)
+        @webmail = Webmail.new
+        @webmail.sender_id =  @club.id
+        @webmail.sender_name = @club.name
+        @webmail.receiver_id = uid
+        @webmail.receiver_type = 0
+        @webmail.content = @information
+        @webmail.ifread = 0
+      }
+    else
+      if kind == 1
+          $LOAD_PATH.unshift(File.dirname(__FILE__)) unless $LOAD_PATH.include?(File.dirname(__FILE__))
+          require 'submail'
+
+          mail_config = {}
+          mail_config["appid"] = "10660"
+          mail_config["appkey"] = "bdd389b857d160c4e73396dbcdd9c455"
+          mail_config["signtype"] = "md5"
+          message_config = {}
+          message_config["appid"] = "10660"
+          message_config["appkey"] = "bdd389b857d160c4e73396dbcdd9c455"
+          message_config["signtype"] = "md5"
+          @content["uids"].each{|uid|
+            @user = User.find_by stu_num: uid
+            messagexsend = MessageXSend.new(message_config)
+            messagexsend.add_to("#{@user.phone_num}")
+            messagexsend.set_project("DguyG")
+            messagexsend.add_var("user_name", "#{@user.name}")
+            messagexsend.add_var("club_name", "#{@club.name}")
+            messagexsend.add_var("code", "#{@content["content"]}")
+            puts messagexsend.message_xsend()
+       }
+      else
+        @article = Article.find(@content["article_id"]).title
+          @content["uids"].each{|uid|
+            @user = User.find_by stu_num: uid
+            if @user.email_verify ==0
+               render nothing: true, status: 405
+            end         
+            UserMailer.inform_email(@club,@article,@information,@user).deliver_now          }
+      end
+    end
+    render nothing: true, status: 200
+  end
+ 
+  #POST /api/clubs/articles/:article_id/comments/reply/:reply_id
+  def reply
+    if params[:reply_id].to_i==-1
+       render nothing: true, status: 404
+    end
+    @club = Club.find_by club_account: request.headers[:uid]
+    @content = JSON.parse(request.body.string)
+    @webmail = Webmail.new
+    @webmail.sender_id =  -1
+    @webmail.sender_name = "system"
+    @comment =  Comment.find_by sender_id: params[:reply_id]
+    @webmail.receiver_id = @comment.sender_id
+    @webmail.receiver_type = 0
+    @webmail.content = @comment.title + " " + @comment.id + "" + @information + " " + @club.name
+    @webmail.ifread = 0
+    render nothing: true, status: 200
+  end
+
+  # POST /api/clubs/webmails/readall
+  def readall
+    @club = User.find_by club_account: request.headers[:uid]
+
+    Webmail.all.each do |webmail|
+       if webmail.receiver_id == @club.id && webmail.if_read
+          webmail.show
+          webmail.if_read=1;
+       end
+    end
+  end
+ 
+
   # POST /api/clubs/login
   def login
     @club = Club.find_by club_account: params[:uid]
