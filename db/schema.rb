@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151216025850) do
+ActiveRecord::Schema.define(version: 20151213125942) do
 
   create_table "applications", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
@@ -29,8 +29,6 @@ ActiveRecord::Schema.define(version: 20151216025850) do
     t.string   "content",    limit: 255
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
-    t.integer  "type",       limit: 4
-    t.date     "deadline"
   end
 
   add_index "articles", ["title"], name: "index_articles_on_title", unique: true, using: :btree
@@ -60,16 +58,6 @@ ActiveRecord::Schema.define(version: 20151216025850) do
     t.integer "club_id", limit: 4
   end
 
-  create_table "comments", force: :cascade do |t|
-    t.integer  "article_id",  limit: 4
-    t.integer  "reply_id",    limit: 4
-    t.string   "content",     limit: 255
-    t.integer  "sender_id",   limit: 4
-    t.integer  "sender_type", limit: 4
-    t.datetime "created_at",              null: false
-    t.datetime "updated_at",              null: false
-  end
-
   create_table "informs", force: :cascade do |t|
     t.integer  "club_id",    limit: 4
     t.string   "users",      limit: 255
@@ -97,32 +85,17 @@ ActiveRecord::Schema.define(version: 20151216025850) do
   add_index "notes", ["user_id", "article_id"], name: "index_notes_on_user_id_and_article_id", unique: true, using: :btree
 
   create_table "users", force: :cascade do |t|
-    t.string   "stu_num",           limit: 255
-    t.string   "name",              limit: 255
-    t.string   "password",          limit: 255
-    t.string   "phone_num",         limit: 11
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
-    t.integer  "log_num",           limit: 4
-    t.string   "user_head",         limit: 255
-    t.string   "email",             limit: 255
-    t.integer  "phone_verify",      limit: 4
-    t.integer  "email_verify",      limit: 4
-    t.integer  "email_verify_code", limit: 4
-    t.integer  "phone_verify_code", limit: 4
+    t.string   "stu_num",    limit: 255
+    t.string   "name",       limit: 255
+    t.string   "password",   limit: 255
+    t.string   "phone_num",  limit: 11
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+    t.integer  "log_num",    limit: 4
+    t.string   "user_head",  limit: 255
+    t.string   "email",      limit: 255
   end
 
   add_index "users", ["stu_num"], name: "index_users_on_stu_num", unique: true, using: :btree
-
-  create_table "webmails", force: :cascade do |t|
-    t.integer  "sender_id",     limit: 4
-    t.string   "sender_name",   limit: 255
-    t.string   "receiver_id",   limit: 255
-    t.integer  "receiver_type", limit: 4
-    t.string   "string",        limit: 255
-    t.integer  "ifread",        limit: 4
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
-  end
 
 end
