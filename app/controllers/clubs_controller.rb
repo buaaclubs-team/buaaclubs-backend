@@ -2,10 +2,30 @@ class ClubsController < ApplicationController
   skip_before_filter :verify_authenticity_token
 
   skip_before_action :require_user_login
-  skip_before_action :require_club_login, only: [:login, :getabstracts]
+  skip_before_action :require_club_login, only: [:login, :getabstracts, :exportlist]
   before_action :set_club, only: [:show, :edit, :update, :destroy]
 
+  def exportlist
+	@club = Club.where(club_account: request.headers[:uid]).take
+#	 @club = Club.where(club_account: 'test1 account').take
 
+	 if @club.nil?
+           render text: 'Club not exit',status: 404
+        end
+        puts @club.club_account
+        @members = @club.members
+        if @members.length < 1
+	   render text: 'Club no members',status: 404
+        else
+	   respond_to do |format|
+		format.html{		
+		  send_data(xls_content_for(@members),
+			   :type => "text/excel;charset=utf-8;header=present",
+			   :filename => "list_Users_#{Time.now.strftime("%Y%m%d")}.xls")
+                }
+	    end
+        end
+  end
   def memberslist
         m = []
         @club = Club.where(club_account: request.headers[:uid]).take
@@ -61,7 +81,7 @@ class ClubsController < ApplicationController
                                 apps << {:uid => @applicants[t].stu_num,
                                       :name => @applicants[t].name,
                                       :user_head => @applicants[t].user_head,
-                                      :time => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.created_at
+                                      :time => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.created_at,
  				      :reason => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.reason}
                           end
                      }
@@ -83,7 +103,7 @@ class ClubsController < ApplicationController
            render text: 'the person already one of club',status: 404
         end
         @Application = Application.where({club_id: @club.id,user_id: params[:user_id].to_i,accept: nil}).take
-        if @Application,nil?
+        if @Application.nil?
            render text: 'Application not exist',status: 404
         end
 	@Application.accept = 1
@@ -103,7 +123,7 @@ class ClubsController < ApplicationController
            render text: 'User not exit',status: 404
         end
         @Application = Application.where({club_id: @club.id,user_id: params[:user_id].to_i,accept: nil}).take
-        if @Application,nil?
+        if @Application.nil?
            render text: 'Application not exist',status: 404
         end
         @Application.accept = 0
@@ -276,5 +296,25 @@ class ClubsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def club_params
       params.require(:club).permit(:club_account,:name, :password, :introduction, :head_url)
+    end
+    def xls_content_for(objs)
+      xls_report = StringIO.new
+      book = Spreadsheet::Workbook.new
+      sheet1 = book.create_worksheet :name => "Members"
+      
+      blue = Spreadsheet::Format.new :color => :blue, :weight => :bold, :size => 10
+      sheet1.row(0).default_format = blue
+   
+      sheet1.row(0).concat %w{学号 姓名 身份证号 邮箱}
+      count_row = 1
+      objs.each do |obj|
+         sheet1[count_row,0] = obj.stu_num
+	 sheet1[count_row,1] = obj.name
+	 sheet1[count_row,2] = obj.phone_num
+         sheet1[count_row,3] = obj.email
+         count_row += 1
+      end
+    book.write xls_report
+    xls_report.string
     end
 end

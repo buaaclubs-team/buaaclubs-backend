@@ -5,10 +5,10 @@ class Club < ActiveRecord::Base
   validates :name, :introduction,:password, :club_account,presence: true
   validates :club_account, :name, uniqueness: true
 
-  has_many :applicants,class_name: 'User',through: :applications
+  has_many :applicants ,class_name: 'User',through: :applications,source: :applicant
   has_many :applications, inverse_of: :club,dependent: :destroy
 
-  has_many :members,class_name: 'User',through: :lists
+  has_many :members,class_name: 'User',through: :lists,source: :member
   has_many :lists, inverse_of: :club,dependent: :destroy
  
   has_many :informs,inverse_of: :club, dependent: :destroy
