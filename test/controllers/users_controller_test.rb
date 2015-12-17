@@ -42,6 +42,28 @@ class UsersControllerTest < ActionController::TestCase
 
        assert_response 401
   end
+  test "should show all webmails unread" do
+        @request.headers["uid"] = "13061196"
+       @request.headers["token"] = Digest::MD5.hexdigest("#{"13061196" + 1234.to_s}")
+       post :readall
+       assert_response :success
+  end
+  test "should create a webmail to reply" do
+        @request.headers["uid"] = "13061196"
+       @request.headers["token"] = Digest::MD5.hexdigest("#{"13061196" + 1234.to_s}")
+       @row = {reply: "you have a unread webmail"}
+       @request.body = JSON.stringify(@row)
+       post :reply, {article_id: "1",reply_id: "1"}
+       assert_response :success
+  end
+  test "should not create a webmail to reply" do
+        @request.headers["uid"] = "13061196"
+       @request.headers["token"] = Digest::MD5.hexdigest("#{"13061196" + 1234.to_s}")
+       @row = {reply: "you have a unread webmail"}
+       @request.body = JSON.stringify(@row)
+       post :reply, {article_id: "1",reply_id: "-1"}
+       assert_response :missing
+  end 
   
 
 '''

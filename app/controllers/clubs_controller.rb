@@ -112,6 +112,14 @@ class ClubsController < ApplicationController
         @list.user_id = params[:user_id].to_i
 	@list.club_id = @club.id
  	@list.save
+        
+        @webmail = Webmail.new
+        @webmail.sender_id =  -1
+        @webmail.sender_name = "system"
+        @webmail.receiver_id = params[:user_id].to_i
+        @webmail.receiver_type = 0
+        @webmail.content = "accepted"
+        @webmail.ifread = 0
         render text: 'success',status: 200
   end
   def refuseapplication
@@ -128,6 +136,14 @@ class ClubsController < ApplicationController
         end
         @Application.accept = 0
 	@Application.save
+        @content = JSON.parse(request.body.string)
+        @webmail = Webmail.new
+        @webmail.sender_id =  -1
+        @webmail.sender_name = "system"
+        @webmail.receiver_id = params[:user_id].to_i
+        @webmail.receiver_type = 0
+        @webmail.content = @content["reason"]
+        @webmail.ifread = 0
         render text: 'success',status: 200
 
 
@@ -249,7 +265,7 @@ class ClubsController < ApplicationController
     @comment =  Comment.find_by sender_id: params[:reply_id]
     @webmail.receiver_id = @comment.sender_id
     @webmail.receiver_type = 0
-    @webmail.content = @comment.title + " " + @comment.id + "" + @information + " " + @club.name
+    @webmail.content = @comment.title + " " + @comment.id + "" + @content + " " + @club.name
     @webmail.ifread = 0
     render nothing: true, status: 200
   end
@@ -259,11 +275,11 @@ class ClubsController < ApplicationController
     @club = User.find_by club_account: request.headers[:uid]
 
     Webmail.all.each do |webmail|
-       if webmail.receiver_id == @club.id && webmail.if_read
-          webmail.show
-          webmail.if_read=1;
+       if webmail.receiver_id == @club.id && webmail.if_read==0
+          webmail.getabstract
        end
     end
+     render nothing: true, status: 200
   end
  
 

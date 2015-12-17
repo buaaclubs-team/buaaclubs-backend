@@ -46,6 +46,7 @@ class UsersController < ApplicationController
     @webmail.receiver_type = 1
     @webmail.content = @user.stu_num + "quit your club!"
     @webmail.ifread = 0
+    render nothing: true, status: 200
    end
 
    #POST /api/users/clubs/articles/:article_id/comments/reply/:reply_id
@@ -71,11 +72,11 @@ class UsersController < ApplicationController
     @user = User.find_by stu_num: request.headers[:uid]
     
     Webmail.all.each do |webmail|
-       if webmail.receiver_id == @user.stu_num && webmail.if_read
-          webmail.show
-          webmail.if_read=1;
+       if webmail.receiver_id == @user.stu_num && webmail.if_read==0
+          webmail.getabstract
        end
     end
+    render nothing: true, status: 200
   end 
 
   # POST /api/users/login

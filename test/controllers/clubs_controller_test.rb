@@ -32,13 +32,35 @@ class ClubsControllerTest < ActionController::TestCase
 
         assert_response :success
   end
-  test "shoule accept application" do
+  test "should accept application" do
         @request.headers["uid"] = "lingfengshe"
        @request.headers["token"] = Digest::MD5.hexdigest("#{"lingfengshe" + 123456.to_s}")
        post :acceptapplication
        assert_response :success
   end
+  test "should show all webmails unread" do
+        @request.headers["uid"] = "lingfengshe"
+       @request.headers["token"] = Digest::MD5.hexdigest("#{"lingfengshe" + 123456.to_s}")
+       post :readall
+       assert_response :success
   end
+  test "should create a webmail to reply" do
+        @request.headers["uid"] = "lingfengshe"
+       @request.headers["token"] = Digest::MD5.hexdigest("#{"lingfengshe" + 123456.to_s}")
+       @row = {reply: "you have a unread webmail"}
+       @request.body = JSON.stringify(@row)
+       post :reply, {article_id: "1",reply_id: "1"} 
+       assert_response :success
+  end
+  test "should not create a webmail to reply" do
+        @request.headers["uid"] = "lingfengshe"
+       @request.headers["token"] = Digest::MD5.hexdigest("#{"lingfengshe" + 123456.to_s}")
+       @row = {reply: "you have a unread webmail"}
+       @request.body = JSON.stringify(@row)
+       post :reply, {article_id: "1",reply_id: "-1"}
+       assert_response :missing
+  end
+end
   
 end
 '''
