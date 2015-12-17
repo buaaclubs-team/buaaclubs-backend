@@ -3,6 +3,17 @@ Rails.application.routes.draw do
   resources :comments
   resources :webmails
   resources :lists
+
+  post '/api/users/phone_num/verify/code' => 'users#verify_phone_sendcode'#手机验证发送验证码
+  post '/api/users/phone_num/verify' => 'users#verify_phone' # 验证验证码是否正确
+  post 'GET /api/users/email/verify' => 'users#verify_email_send' # 验证邮箱，给邮箱寄信
+  get '/api/users/email/verify/:hash_code' => 'users#verify_email' # 验证邮箱，邮箱点击链接返回
+
+  post '/api/users/forgetpassword/email' => 'users#fp_email' # 忘记密码，邮箱
+  get '/api/users/forgetpassword/email/verify/:hash_code' => 'users#fp_email_verify' # 忘记密码，邮箱转跳
+  post '/api/users/forgetpassword/phone_num/send' => 'users#fp_phone_send' # 忘记密码，手机
+  post '/api/users/forgetpassword/phone_num/verify' => 'users#fp_phone_verify' # 忘记密码，手机
+
   get '/api/clubs/members/all' => 'clubs#memberslist'#获取社团名单
   #发送通知
   post 'api/clubs/users/export' => 'clubs#exportlist' #导出名单
