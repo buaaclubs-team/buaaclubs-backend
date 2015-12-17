@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151216153329) do
+ActiveRecord::Schema.define(version: 20151217092208) do
 
   create_table "applications", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
@@ -61,6 +61,16 @@ ActiveRecord::Schema.define(version: 20151216153329) do
     t.integer "club_id", limit: 4
   end
 
+  create_table "comments", force: :cascade do |t|
+    t.integer  "article_id",  limit: 4
+    t.integer  "reply_id",    limit: 4
+    t.string   "content",     limit: 255
+    t.integer  "sender_id",   limit: 4
+    t.integer  "sender_type", limit: 4
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+  end
+
   create_table "informs", force: :cascade do |t|
     t.integer  "club_id",    limit: 4
     t.string   "users",      limit: 255
@@ -104,5 +114,16 @@ ActiveRecord::Schema.define(version: 20151216153329) do
   end
 
   add_index "users", ["stu_num"], name: "index_users_on_stu_num", unique: true, using: :btree
+
+  create_table "webmails", force: :cascade do |t|
+    t.integer  "sender_id",     limit: 4
+    t.string   "sender_name",   limit: 255
+    t.integer  "receiver_id",   limit: 4
+    t.integer  "receiver_type", limit: 4
+    t.string   "content",       limit: 255
+    t.integer  "ifread",        limit: 4
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+  end
 
 end

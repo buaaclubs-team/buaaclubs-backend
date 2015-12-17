@@ -1,0 +1,34 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Sender:</strong>
+  <%= @webmail.sender_id %>
+</p>
+
+<p>
+  <strong>Sender name:</strong>
+  <%= @webmail.sender_name %>
+</p>
+
+<p>
+  <strong>Receiver:</strong>
+  <%= @webmail.receiver_id %>
+</p>
+
+<p>
+  <strong>Receiver type:</strong>
+  <%= @webmail.receiver_type %>
+</p>
+
+<p>
+  <strong>Content:</strong>
+  <%= @webmail.content %>
+</p>
+
+<p>
+  <strong>Ifread:</strong>
+  <%= @webmail.ifread %>
+</p>
+
+<%= link_to 'Edit', edit_webmail_path(@webmail) %> |
+<%= link_to 'Back', webmails_path %>
