@@ -38,4 +38,26 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def sendMessageVeryifyCode(code, phone)
+     $LOAD_PATH.unshift(File.dirname(__FILE__)) unless $LOAD_PATH.include?(File.dirname(__FILE__))
+    require 'submail'
+   
+    mail_config = {}
+    mail_config["appid"] = "10660"
+    mail_config["appkey"] = "bdd389b857d160c4e73396dbcdd9c455"
+    mail_config["signtype"] = "md5"
+    message_config = {}
+    message_config["appid"] = "10660"
+    message_config["appkey"] = "bdd389b857d160c4e73396dbcdd9c455"
+    message_config["signtype"] = "md5"
+   
+    #message xsend
+    
+    messagexsend = MessageXSend.new(message_config)
+    messagexsend.add_to("#{phone}")
+    messagexsend.set_project("HpBVJ4")
+    messagexsend.add_var("code", "#{code}")
+    puts messagexsend.message_xsend()}
+	render nothing: true, status: 200
+  end
 end

@@ -5,6 +5,47 @@ class UsersController < ApplicationController
   skip_before_action :require_user_login, only: [:register, :login, :checkuid]
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
+  # POST '/api/users/phone_num/verify/code' 手机验证发送验证码
+  def verify_phone_sendcode
+	
+  end
+  
+  # POST '/api/users/phone_num/verify'  验证验证码是否正确
+  def verify_phone
+  
+  end
+  
+  # POST 'GET /api/users/email/verify' 验证邮箱，给邮箱寄信
+  def verify_email_send
+  
+  end
+  
+  # GET '/api/users/email/verify/:hash_code' 验证邮箱，邮箱点击链接返回
+  def verify_email
+  
+  end
+  
+  # POST '/api/users/forgetpassword/email' 忘记密码，邮箱
+  def fp_email
+  
+  end
+  
+  # GET '/api/users/forgetpassword/email/verify/:hash_code' 忘记密码，邮箱转跳
+  def fp_email_verify
+  
+  end
+  
+  # POST '/api/users/forgetpassword/phone_num/send' 忘记密码，手机
+  def fp_phone_send
+  
+  end
+  
+  # POST '/api/users/forgetpassword/phone_num/verify' 忘记密码，手机
+  def fp_phone_verify
+  
+  end
+  
+  # GET '/api/users/register/check/:uid'
   def checkuid
      @user = User.find_by stu_num: params[:uid]
      if @user.nil?
