@@ -120,6 +120,7 @@ class ClubsController < ApplicationController
         @webmail.receiver_type = 0
         @webmail.content = "accepted"
         @webmail.ifread = 0
+        @webmail.save
         render text: 'success',status: 200
   end
   def refuseapplication
@@ -144,6 +145,7 @@ class ClubsController < ApplicationController
         @webmail.receiver_type = 0
         @webmail.content = @content["reason"]
         @webmail.ifread = 0
+        @webmail.save
         render text: 'success',status: 200
 
 
@@ -267,6 +269,7 @@ class ClubsController < ApplicationController
     @webmail.receiver_type = 0
     @webmail.content = @comment.title + " " + @comment.id + "" + @content + " " + @club.name
     @webmail.ifread = 0
+    @webmail.save
     render nothing: true, status: 200
   end
 
@@ -275,7 +278,7 @@ class ClubsController < ApplicationController
     @club = User.find_by club_account: request.headers[:uid]
 
     Webmail.all.each do |webmail|
-       if webmail.receiver_id == @club.id && webmail.if_read==0
+       if webmail.receiver_id == @user.stu_num 
           webmail.getabstract
        end
     end

@@ -46,6 +46,7 @@ class UsersController < ApplicationController
     @webmail.receiver_type = 1
     @webmail.content = @user.stu_num + "quit your club!"
     @webmail.ifread = 0
+    @webmail.save
     render nothing: true, status: 200
    end
 
@@ -64,6 +65,7 @@ class UsersController < ApplicationController
     @webmail.receiver_type = 0
     @webmail.content = @comment.title + " " + @comment.id + "" + @information + " " + @user.stu_num
     @webmail.ifread = 0
+    @webmail.save
     render nothing: true, status: 200
   end
 
@@ -72,7 +74,7 @@ class UsersController < ApplicationController
     @user = User.find_by stu_num: request.headers[:uid]
     
     Webmail.all.each do |webmail|
-       if webmail.receiver_id == @user.stu_num && webmail.if_read==0
+       if webmail.receiver_id == @user.stu_num 
           webmail.getabstract
        end
     end

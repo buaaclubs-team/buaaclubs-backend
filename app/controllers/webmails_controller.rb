@@ -1,6 +1,20 @@
 class WebmailsController < ApplicationController
   before_action :set_webmail, only: [:show, :edit, :update, :destroy]
 
+  #POST /api/users/webmails/readone/:webmail_id
+  def getcontent
+    @webmail = Webmail.find(params[:webmail_id].to_i)
+    if @webmail.nil?
+       render text: 'Webmail not exit',status: 404    
+    end
+    if @webmail.ifread==0
+       @webmail.ifreaf=1
+    end
+    a = []
+    a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread} 
+    format.html { render :json=>{:txt => a}.to_json }
+  end
+
   # GET /webmails
   # GET /webmails.json
   def index
