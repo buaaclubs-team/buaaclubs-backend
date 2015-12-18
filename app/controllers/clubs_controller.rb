@@ -236,7 +236,7 @@ class ClubsController < ApplicationController
     render nothing: true, status: 200
   end
  
-  #POST /api/clubs/articles/:article_id/comments/reply/:reply_id
+  #POST /api/clubs/articles/:article_id/comments/reply/:reply_id 社团回复
   def reply
     if params[:reply_id].to_i==-1
        render nothing: true, status: 404

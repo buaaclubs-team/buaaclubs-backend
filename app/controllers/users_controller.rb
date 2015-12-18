@@ -15,11 +15,23 @@ class UsersController < ApplicationController
     @user.phone_verify_code = rand(9999)
     @user.save
     sendMessageVeryifyCode(@user.phone_verify_code, @user.phone_num)
+    render text: 'sent', status: 200
   end
   
   # POST '/api/users/phone_num/verify'  验证验证码是否正确
   def verify_phone
-  
+    @body = JSON.parse(request.body.string)
+    @user = User.find_by stu_num: @body["stu_num"]
+    @code = @body["code"]
+    if @user.nil?
+      render text: 'User not exist', status: 404
+    end
+    if Digest::MD5.hexdigest("#{@user.phone_verify_code.to_s}") != code then render text: 'verification failed', status: 404
+    else {
+      @user.phone_verify = 1
+      render text: 'verification succeed', status: 200
+    }
+    @user.save
   end
   
   # POST 'GET /api/users/email/verify' 验证邮箱，给邮箱寄信
@@ -78,6 +90,7 @@ class UsersController < ApplicationController
     if @user.save
       UserMailer.welcome_email(@user).deliver_now
       @user.log_num = rand(10000000)
+      @user.save
       render :json => {:name => @user.name, :uid => @user.stu_num, :token => Digest::MD5.hexdigest("#{@user.stu_num.to_s + @user.log_num.to_s}"), :user_head =>  @user.user_head}
     else
       render json: @user.errors, status: :unprocessable_entity
@@ -96,7 +109,7 @@ class UsersController < ApplicationController
     @webmail.ifread = 0
    end
 
-   #POST /api/users/clubs/articles/:article_id/comments/reply/:reply_id
+   #POST /api/users/clubs/articles/:article_id/comments/reply/:reply_id 用户评论
    def reply
     if params[:reply_id].to_i==-1
        render nothing: true, status: 404
@@ -132,6 +145,8 @@ class UsersController < ApplicationController
    
     @user = User.find_by stu_num: params[:uid]
     if !@user.nil? and @user.password == params[:passwd]
+      @user.log_num = rand(10000000)
+      @user.save
       render :json => {:name => @user.name, :uid => @user.stu_num, :token => Digest::MD5.hexdigest("#{@user.stu_num.to_s + @user.log_num.to_s}"), :user_head => @user.user_head}
     else
       render :json =>  {txt: 'user login failed'}, status: 401
