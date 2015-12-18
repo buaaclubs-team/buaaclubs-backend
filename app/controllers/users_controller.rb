@@ -7,7 +7,14 @@ class UsersController < ApplicationController
 
   # POST '/api/users/phone_num/verify/code' 手机验证发送验证码
   def verify_phone_sendcode
-	
+    @body = JSON.parse(request.body.string)
+    @user = User.find_by stu_num: @body["stu_num"]
+    if @user.nil?
+      render text: 'User not exist', status: 404
+    end
+    @user.phone_verify_code = rand(9999)
+    @user.save
+    sendMessageVeryifyCode(@user.phone_verify_code, @user.phone_num)
   end
   
   # POST '/api/users/phone_num/verify'  验证验证码是否正确
