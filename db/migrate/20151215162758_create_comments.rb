@@ -6,7 +6,7 @@ class CreateComments < ActiveRecord::Migration
 	t.string :content
 	t.integer :sender_id
 	t.integer :sender_type
-	t.timestaps
+	t.timestamps
     end
   end
 end

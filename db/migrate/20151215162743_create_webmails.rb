@@ -8,7 +8,7 @@ class CreateWebmails < ActiveRecord::Migration
 	t.string :string
 	t.integer :ifread
 
-	t.timestaps
+	t.timestamps
     end
   end
 end
