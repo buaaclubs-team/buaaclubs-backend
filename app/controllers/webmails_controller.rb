@@ -8,7 +8,7 @@ class WebmailsController < ApplicationController
        render text: 'Webmail not exit',status: 404    
     end
     if @webmail.ifread==0
-       @webmail.ifreaf=1
+       @webmail.ifread=1
     end
     a = []
     a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread} 

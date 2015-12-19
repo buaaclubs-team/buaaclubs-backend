@@ -208,8 +208,9 @@ class ClubsController < ApplicationController
     if kind==0 
       @inform.type = 0
       @inform.club_id = @club.id
+      a = []
       @content["uids"].each{|uid|
-        @inform.concat(uid)
+        a<<{:user_id => uid}
         @webmail = Webmail.new
         @webmail.sender_id =  @club.id
         @webmail.sender_name = @club.name
@@ -217,7 +218,9 @@ class ClubsController < ApplicationController
         @webmail.receiver_type = 0
         @webmail.content = @information
         @webmail.ifread = 0
+        @webmail.save
       }
+      @inform.users = a.to_json
     else
       if kind == 1
           $LOAD_PATH.unshift(File.dirname(__FILE__)) unless $LOAD_PATH.include?(File.dirname(__FILE__))
@@ -276,10 +279,11 @@ class ClubsController < ApplicationController
   # POST /api/clubs/webmails/readall
   def readall
     @club = User.find_by club_account: request.headers[:uid]
-
+    a =[]
     Webmail.all.each do |webmail|
-       if webmail.receiver_id == @user.stu_num 
-          webmail.getabstract
+       if webmail.receiver_id == @club.id
+         a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
+         format.html { render :json=>{:txt => a}.to_json }
        end
     end
      render nothing: true, status: 200

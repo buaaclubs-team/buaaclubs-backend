@@ -72,10 +72,11 @@ class UsersController < ApplicationController
   #POST /api/users/webmails/readall
   def readall
     @user = User.find_by stu_num: request.headers[:uid]
-    
+    a = []
     Webmail.all.each do |webmail|
        if webmail.receiver_id == @user.stu_num 
-          webmail.getabstract
+          a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
+          format.html { render :json=>{:txt => a}.to_json }
        end
     end
     render nothing: true, status: 200

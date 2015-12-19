@@ -31,6 +31,8 @@ Rails.application.routes.draw do
   post '/api/users/articles/:article_id/comments/reply/:reply_id' => 'users#reply'  
   post '/api/users/webmails/readall' => 'users#readall'
   post '/api/clubs/webmails/readall' => 'clubs#readall'
+  post '/api/users/webmails/usergetcontent/:webmail_id' => 'webmails#usergetcontent'
+   post '/api/clubs/webmails/clubgetcontent/:webmail_id' => 'webmails#clubgetcontent'
 
 
   post '/api/clubs/articles/detail/create' => 'articles#create'
