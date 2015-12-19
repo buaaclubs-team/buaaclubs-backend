@@ -93,10 +93,11 @@ class ClubsController < ApplicationController
 
   def acceptapplication
 	@club = Club.where(club_account: request.headers[:uid]).take
-        if @club.nil?
+        @user = USer.find_by 
+	if @club.nil?
            render text: 'Club not exit',status: 404
         end
-	if User.find(params[:user_id].to_i).nil?
+	if User.find_by stu_num: (params[:uid].to_i).nil?
 	   render text: 'User not exit',status: 404
         end
         if List.where(club_id: @club.id,user_id: params[:user_id].to_i).take.nil?
@@ -112,6 +113,12 @@ class ClubsController < ApplicationController
         @list.user_id = params[:user_id].to_i
 	@list.club_id = @club.id
  	@list.save
+	@webmail = Webmail.new
+	@webmail.sender_id = -1;
+	@webmail.sender_name = '系统'
+	@webmail.receiver_id = @user.id
+	@webmail.content = "您报名的社团" +　@club.name + "批准了您的加入请求"
+	@webmail.ifread = 0;
         render text: 'success',status: 200
   end
   def refuseapplication
