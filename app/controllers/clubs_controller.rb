@@ -93,24 +93,24 @@ class ClubsController < ApplicationController
 
   def acceptapplication
 	@club = Club.where(club_account: request.headers[:uid]).take
-        @user = USer.find_by 
+        @user = User.find_by stu_num: params[:uid]
 	if @club.nil?
            render text: 'Club not exit',status: 404
         end
-	if User.find_by stu_num: (params[:uid].to_i).nil?
+	if @user.nil?
 	   render text: 'User not exit',status: 404
         end
-        if List.where(club_id: @club.id,user_id: params[:user_id].to_i).take.nil?
+        if List.where(club_id: @club.id,user_id: @user.id).take.nil?
            render text: 'the person already one of club',status: 404
         end
-        @Application = Application.where({club_id: @club.id,user_id: params[:user_id].to_i,accept: nil}).take
+        @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: nil}).take
         if @Application.nil?
            render text: 'Application not exist',status: 404
         end
 	@Application.accept = 1
         @Application.save
         @list = List.new
-        @list.user_id = params[:user_id].to_i
+        @list.user_id = @user.id
 	@list.club_id = @club.id
  	@list.save
 	@webmail = Webmail.new
@@ -123,18 +123,26 @@ class ClubsController < ApplicationController
   end
   def refuseapplication
 	@club = Club.where(club_account: request.headers[:uid]).take
+	@user = User.find_by stu_num: params[:uid]
         if @club.nil?
            render text: 'Club not exit',status: 404
         end
-        if User.find(params[:user_id].to_i).nil?
+        if @user.nil?
            render text: 'User not exit',status: 404
         end
-        @Application = Application.where({club_id: @club.id,user_id: params[:user_id].to_i,accept: nil}).take
+        @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: nil}).take
         if @Application.nil?
            render text: 'Application not exist',status: 404
         end
         @Application.accept = 0
 	@Application.save
+	@webmail = Webmail.new
+        @webmail.sender_id = -1;
+        @webmail.sender_name = '系统'
+        @webmail.receiver_id = @user.id
+        @webmail.content = "您报名的社团" +　@club.name + "拒绝了您的加入请求"
+        @webmail.ifread = 0;
+
         render text: 'success',status: 200
 
 
