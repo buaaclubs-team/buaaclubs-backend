@@ -39,7 +39,10 @@ class UsersController < ApplicationController
   
   # POST 'GET /api/users/email/verify' 验证邮箱，给邮箱寄信
   def verify_email_send
- 
+    @body = JSON.parse(request.body.string)
+    @user = User.find_by stu_num: @body["stu_num"]
+	@user.email = @body["email"]
+	@user.
   end
   
   # GET '/api/users/email/verify/:hash_code' 验证邮箱，邮箱点击链接返回
