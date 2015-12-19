@@ -6,15 +6,31 @@ class CommentsController < ApplicationController
     @article = Article.find(params[:article_id].to_i)
     list = []
     @article.commenets.each{|temp|
-				 if(temp.sender_type == 1) then
+				 if(temp.sender_type == 1)
 				   @sender = Club.find(temp.sender_id)
+				   list <<{
+					:uid => @sender.club_account,
+					:type => 1,
+					:name => @sender.name,
+		 			:user_head => @sender.head_url,
+					:content => temp.content,
+					:time => temp.created_at,
+					:comment_id => temp.id
+					}
 				 else
 				   @sender = User.find(temp.sender_id)
+				   list <<{
+                                        :uid => @sender.stu_num,
+					:type => 0,
+                                        :name => @sender.name,
+                                        :user_head => @sender.user_head,
+                                        :content => temp.content,
+                                        :time => temp.created_at,
+                                        :comment_id => temp.id
+                                        }
 				 end
-				 list<<{
-					:type => temp.sender_type,
-					:name => temp.}
-    }    
+    }
+    render :json => {:txt => list}.to_json
   end
 
 
