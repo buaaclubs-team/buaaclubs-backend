@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   resources :webmails
   resources :lists
 
-  get '/api/articles/:article_id/comments' => 'articles#getcomments' # 获得当前文章评论
+  get '/api/articles/:article_id/comments' => 'comments#getcomments' # 获得当前文章评论
 
   post '/api/users/phone_num/verify/code' => 'users#verify_phone_sendcode'# 手机验证发送验证码
   post '/api/users/phone_num/verify' => 'users#verify_phone' # 验证验证码是否正确

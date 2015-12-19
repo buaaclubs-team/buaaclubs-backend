@@ -1,6 +1,13 @@
 class CommentsController < ApplicationController
   before_action :set_comment, only: [:show, :edit, :update, :destroy]
 
+  # GET /api/articles/:article_id/comments 获取当前文章的评论
+  def getcomments
+    
+  end
+
+
+
   # GET /comments
   # GET /comments.json
   def index

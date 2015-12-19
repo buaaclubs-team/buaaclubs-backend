@@ -6,11 +6,6 @@ class ArticlesController < ApplicationController
   skip_before_action :require_club_login, only: [ :abstracts, :detail, :index]
   before_action :set_article, only: [:show, :edit, :update, :destroy]
 
-  # GET /api/articles/:article_id/comments 获取当前文章的评论
-  def getcomments
-  
-  end
-
 
   # POST /api/clubs/articles/detail/:article_id/list/delete
   def cutlist
