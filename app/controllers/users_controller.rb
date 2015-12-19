@@ -24,19 +24,22 @@ class UsersController < ApplicationController
     @user = User.find_by stu_num: @body["stu_num"]
     @code = @body["code"]
     if @user.nil?
-      render text: 'User not exist', status: 404
+        render text: 'User not exist', status: 404
     end
-    if Digest::MD5.hexdigest("#{@user.phone_verify_code.to_s}") != code then render text: 'verification failed', status: 404
-    else {
-      @user.phone_verify = 1
-      render text: 'verification succeed', status: 200
-    }
-    @user.save
+    if Digest::MD5.hexdigest("#{@user.phone_verify_code.to_s}") != code
+        @user.phone_verify = 0
+        @user.save
+	render text: 'verification code wrong', status: 404
+    else
+        @user.phone_verify = 1
+        @user.save
+        render text: 'succeeded', status: 200
+    end
   end
   
   # POST 'GET /api/users/email/verify' 验证邮箱，给邮箱寄信
   def verify_email_send
-  
+ 
   end
   
   # GET '/api/users/email/verify/:hash_code' 验证邮箱，邮箱点击链接返回
@@ -56,12 +59,35 @@ class UsersController < ApplicationController
   
   # POST '/api/users/forgetpassword/phone_num/send' 忘记密码，手机
   def fp_phone_send
-  
+    @body = JSON.parse(request.body.string)
+    @user = User.find_by stu_num: @body["stu_num"]
+    if @user.nil?
+      render text: 'User not exist', status: 404
+    end
+    if @user.phone_verify == 0 then render text: 'Phone not verified', status: 401 end
+    @user.phone_verify_code = rand(9999)
+    @user.save
+    sendMessageVeryifyCode(@user.phone_verify_code, @user.phone_num)
+    render text: 'sent', status: 200
   end
   
   # POST '/api/users/forgetpassword/phone_num/verify' 忘记密码，手机
   def fp_phone_verify
-  
+    @body = JSON.parse(request.body.string)
+    @user = User.find_by stu_num: @body["stu_num"]
+    @code = @body["code"]
+    if @user.nil?
+	render text: 'User not exist', status: 404
+    end
+    if Digest::MD5.hexdigest("#{@user.phone_verify_code.to_s}") != code
+	@user.phone_verify = 0
+	@user.save
+	render text: 'verification failed', status: 404
+    else 
+	@user.phone_verify = 1
+	@user.save
+	redirect_to "http://www.buaaclubs.com/myWeb/myNewHomePage.html/"
+    end
   end
   
   # GET '/api/users/register/check/:uid'
