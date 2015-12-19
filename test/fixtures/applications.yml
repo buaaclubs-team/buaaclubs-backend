@@ -5,13 +5,13 @@
 # below each fixture, per the syntax in the comments below
 #
 one:
-   user: one
-   club: one
+   user_id: one
+   club_id: one
    reason: 可以的
 # column: value
 #
 two:
-   user: two
-   club: two
+   user_id: two
+   club_id: two
    reason: 不可以吗
 #  column: value

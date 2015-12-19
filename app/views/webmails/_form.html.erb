@@ -1,0 +1,41 @@
+<%= form_for(@webmail) do |f| %>
+  <% if @webmail.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@webmail.errors.count, "error") %> prohibited this webmail from being saved:</h2>
+
+      <ul>
+      <% @webmail.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :sender_id %><br>
+    <%= f.number_field :sender_id %>
+  </div>
+  <div class="field">
+    <%= f.label :sender_name %><br>
+    <%= f.text_field :sender_name %>
+  </div>
+  <div class="field">
+    <%= f.label :receiver_id %><br>
+    <%= f.number_field :receiver_id %>
+  </div>
+  <div class="field">
+    <%= f.label :receiver_type %><br>
+    <%= f.number_field :receiver_type %>
+  </div>
+  <div class="field">
+    <%= f.label :content %><br>
+    <%= f.text_field :content %>
+  </div>
+  <div class="field">
+    <%= f.label :ifread %><br>
+    <%= f.number_field :ifread %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

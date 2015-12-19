@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
 
+  resources :comments
+  resources :webmails
   resources :lists
   get '/api/clubs/members/all' => 'clubs#memberslist'#获取社团名单
   #发送通知
