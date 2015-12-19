@@ -3,7 +3,18 @@ class CommentsController < ApplicationController
 
   # GET /api/articles/:article_id/comments 获取当前文章的评论
   def getcomments
-    
+    @article = Article.find(params[:article_id].to_i)
+    list = []
+    @article.commenets.each{|temp|
+				 if(temp.sender_type == 1) then
+				   @sender = Club.find(temp.sender_id)
+				 else
+				   @sender = User.find(temp.sender_id)
+				 end
+				 list<<{
+					:type => temp.sender_type,
+					:name => temp.}
+    }    
   end
 
 
