@@ -3,6 +3,8 @@ Rails.application.routes.draw do
   resources :comments
   resources :webmails
   resources :lists
+  get '/api/users/detail' => 'users#detail'#返回个人信息
+  post '/api/users/statistics' => 'users#statistics'#返回用户参加的社团个数和报名活动个数
   get '/api/clubs/members/all' => 'clubs#memberslist'#获取社团名单
   #发送通知
   post 'api/clubs/users/export' => 'clubs#exportlist' #导出名单

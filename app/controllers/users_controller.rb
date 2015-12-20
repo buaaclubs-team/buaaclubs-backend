@@ -2,9 +2,30 @@ class UsersController < ApplicationController
  # before_action :set_user, only: [:show, :edit, :update, :destroy]
   skip_before_filter :verify_authenticity_token
   skip_before_action :require_club_login
-  skip_before_action :require_user_login, only: [:register, :login, :checkuid]
+  skip_before_action :require_user_login, only: [:register, :login, :checkuid,:detail,:statistics]
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
+  #GET /api/users/detail
+  def detail
+     @user = User.find_by stu_num: params[:uid]
+     if @user.nil?
+        render :json => {txt:'user not exit' } ,status: 404
+     else
+	render :json => {:uid => @user.stu_num,:name => @user.name,:phone_num =>@user.phone_num,:email => @user.email,:user_head => @user.user_head,:phone_num_verify => @user.phone_verify,:email_verify => @user.email_verify},status: 404
+     end
+
+  end
+  #POST /api/users/statistics 
+  def ststistics
+      @user = User.find_by stu_num: params[:uid]
+     if @user.nil?
+        render :json => {txt:'user not exit' } ,status: 404
+     else
+	club_num = @user.clubs.length
+        activity_num = @user.articles.length
+        render :json => {:club_num => club_num,:activity_num => activity_num},status:200
+     end
+  end
   def checkuid
      @user = User.find_by stu_num: params[:uid]
      if @user.nil?
