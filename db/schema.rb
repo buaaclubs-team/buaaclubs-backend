@@ -56,9 +56,9 @@ ActiveRecord::Schema.define(version: 20151217092208) do
 
   add_index "clubs", ["club_account"], name: "index_clubs_on_club_account", unique: true, using: :btree
 
-  create_table "clubs_users", force: :cascade do |t|
-    t.integer "user_id", limit: 4
+  create_table "clubs_users", id: false, force: :cascade do |t|
     t.integer "club_id", limit: 4
+    t.integer "user_id", limit: 4
   end
 
   create_table "comments", force: :cascade do |t|

@@ -270,7 +270,7 @@ class ClubsController < ApplicationController
     @comment =  Comment.find_by sender_id: params[:reply_id]
     @webmail.receiver_id = @comment.sender_id
     @webmail.receiver_type = 0
-    @webmail.content = @comment.title + " " + @comment.id + "" + @content + " " + @club.name
+    @webmail.content = @comment.content + " " + @comment.id + "" + @content + " " + @club.name
     @webmail.ifread = 0
     @webmail.save
     render nothing: true, status: 200

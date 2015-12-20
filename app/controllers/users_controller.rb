@@ -63,7 +63,7 @@ class UsersController < ApplicationController
     @comment =  Comment.find_by sender_id: params[:reply_id]
     @webmail.receiver_id = @comment.sender_id
     @webmail.receiver_type = 0
-    @webmail.content = @comment.title + " " + @comment.id + "" + @information + " " + @user.stu_num
+    @webmail.content = @comment.content + " " + @comment.id + "" + @content + " " + @user.stu_num
     @webmail.ifread = 0
     @webmail.save
     render nothing: true, status: 200
@@ -75,7 +75,7 @@ class UsersController < ApplicationController
     a = []
     Webmail.all.each do |webmail|
        if webmail.receiver_id == @user.stu_num 
-          a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
+          a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
           format.html { render :json=>{:txt => a}.to_json }
        end
     end
@@ -86,8 +86,10 @@ class UsersController < ApplicationController
   def login
 #    @user = User.find_by stu_num: env["HTTP_UID"].to_i
    
-    @user = User.find_by stu_num: params[:uid]
-    if !@user.nil? and @user.password == params[:passwd]
+    @user = User.find_by stu_num: request.headers[:uid]
+    puts params[:uid]
+    puts params[:passwd]
+    if !@user.nil? and @user.password == request.headers[:passwd]
       render :json => {:name => @user.name, :uid => @user.stu_num, :token => Digest::MD5.hexdigest("#{@user.stu_num.to_s + @user.log_num.to_s}"), :user_head => @user.user_head}
     else
       render :json =>  {txt: 'user login failed'}, status: 401
