@@ -41,23 +41,51 @@ class UsersController < ApplicationController
   def verify_email_send
     @body = JSON.parse(request.body.string)
     @user = User.find_by stu_num: @body["stu_num"]
+	if @user.nil? then render text: 'user not exist', status: 404 end
 	@user.email = @body["email"]
-	@user.
+	@user.email_verify = 0
+	@user.email_verify_code = rand(10000000)
+	@user.save
+	UserMailer.verify_email(@user)
+	render nothing: true, status: 200
   end
   
-  # GET '/api/users/email/verify/:hash_code' 验证邮箱，邮箱点击链接返回
+  # GET '/api/users/email/verify/:uid/:hash_code' 验证邮箱，邮箱点击链接返回
   def verify_email
-  
+    @user = User.find_by stu_num: params[:uid]
+	if @user.nil? then render text: 'user not exist', status: 404 end
+	if params[:hash_code] == Digest::MD5.hexdigest("#{@user.email_verify_code.to_s + @user.stu_num}")
+	  @user.email_verify = 1
+	  @user.save
+	  redirect_to "http://www.buaaclubs.com/myWeb/myNewHomePage.html/" # 改为有参数的登陆成功页面
+	else
+		redirect_to "http://www.buaaclubs.com/myWeb/myNewHomePage.html/" # 理想的应该是验证失败页面
+	end
   end
   
   # POST '/api/users/forgetpassword/email' 忘记密码，邮箱
   def fp_email
-  
+    @body = JSON.parse(request.body.string)
+    @user = User.find_by stu_num: @body["stu_num"]
+	if @user.nil? then render text: 'user not exist', status: 404 end
+	if @user.email_verify == 0 then render text: 'email not verified', status: 401 end
+	@user.email_verify_code = rand(10000000)
+	@user.save
+	UserMailer.fp_email(@user)
+	render nothing: true, status: 200
   end
   
-  # GET '/api/users/forgetpassword/email/verify/:hash_code' 忘记密码，邮箱转跳
+  # GET '/api/users/forgetpassword/email/verify/:uid/:hash_code' 忘记密码，邮箱转跳
   def fp_email_verify
-  
+    @user = User.find_by stu_num: params[:uid]
+	if @user.nil? then render text: 'user not exist', status: 404 end
+	if params[:hash_code] == Digest::MD5.hexdigest("#{@user.email_verify_code.to_s + @user.stu_num}")
+	  @user.email_verify = 1
+	  @user.save
+	  redirect_to "http://www.buaaclubs.com/myWeb/myNewHomePage.html/" # 改为有参数的设置密码按页面
+	else
+		redirect_to "http://www.buaaclubs.com/myWeb/myNewHomePage.html/" # 理想的应该是验证失败页面
+	end 
   end
   
   # POST '/api/users/forgetpassword/phone_num/send' 忘记密码，手机
@@ -89,7 +117,7 @@ class UsersController < ApplicationController
     else 
 	@user.phone_verify = 1
 	@user.save
-	redirect_to "http://www.buaaclubs.com/myWeb/myNewHomePage.html/"
+	redirect_to "http://www.buaaclubs.com/myWeb/myNewHomePage.html/" # 改为有参数的登陆成功页面
     end
   end
   
