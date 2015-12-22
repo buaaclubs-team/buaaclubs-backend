@@ -267,10 +267,11 @@ class ClubsController < ApplicationController
     @webmail = Webmail.new
     @webmail.sender_id =  -1
     @webmail.sender_name = "system"
-    @comment =  Comment.find_by sender_id: params[:reply_id]
+    @comment =  Comment.find_by sender_id: params[:reply_id]i
     @webmail.receiver_id = @comment.sender_id
+    @article = Article.find( params[:article_id].to_i)
     @webmail.receiver_type = 0
-    @webmail.content = @comment.content + " " + @comment.id + "" + @content + " " + @club.name
+    @webmail.content = @article.abstract+ @comment.content + " " + @comment.id.to_s + "" + @content["content"] + " " + @user.stu_num.to_s
     @webmail.ifread = 0
     @webmail.save
     render nothing: true, status: 200
@@ -278,17 +279,36 @@ class ClubsController < ApplicationController
 
   # POST /api/clubs/webmails/readall
   def readall
-    @club = User.find_by club_account: request.headers[:uid]
+    @club = Club.find_by club_account: request.headers[:uid]
+    if @club.nil?
+        render nothing: true, status: 404
+    end
     a =[]
     Webmail.all.each do |webmail|
        if webmail.receiver_id == @club.id
-         a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
-         format.html { render :json=>{:txt => a}.to_json }
+         a<<{:webmail_id => webmail.id,:sender_id => webmail.sender_id,:sender_name=>webmail.sender_name, :receiver_id => webmail.receiver_id,:receiver_id,:content=>webmail.content,:if_read=>webmail.ifread}
+         #format.html { render :json=>{:txt => a}.to_json }
        end
     end
-     render nothing: true, status: 200
+     render :json=>{:txt=>a}.to_json, status: 200
   end
  
+  def clubgetcontent
+    @club = Club.find_by club_account: request.headers[:uid]
+    if @club.nil?
+        render nothing: true, status: 404
+    end
+    @webmail = Webmail.find(params[:webmail_id].to_i)
+    if @webmail.nil?
+       render text: 'Webmail not exit',status: 404
+    end
+    if @webmail.ifread==0
+       @webmail.ifread=1
+    end
+    a = []
+    a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
+    render :json=>{:txt => a}.to_json, status:200
+  end 
 
   # POST /api/clubs/login
   def login

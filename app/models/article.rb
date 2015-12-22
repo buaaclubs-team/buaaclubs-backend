@@ -6,4 +6,5 @@ class Article < ActiveRecord::Base
 
   validates :club, presence: true
   validates :title, :abstract, :content,  presence: true
+  self.inheritance_column = ""
 end

@@ -44,7 +44,7 @@ class UsersController < ApplicationController
     @webmail.sender_name = "system"
     @webmail.receiver_id = @club.id
     @webmail.receiver_type = 1
-    @webmail.content = @user.stu_num + "quit your club!"
+    @webmail.content = @user.stu_num.to_s + "quit your club!"
     @webmail.ifread = 0
     @webmail.save
     render nothing: true, status: 200
@@ -60,10 +60,12 @@ class UsersController < ApplicationController
     @webmail = Webmail.new
     @webmail.sender_id =  -1
     @webmail.sender_name = "system"
-    @comment =  Comment.find_by sender_id: params[:reply_id]
+    @comment =  Comment.find_by sender_id: params[:reply_id].to_i
+    #puts params[:article_id]
+    @article = Article.find( params[:article_id].to_i)
     @webmail.receiver_id = @comment.sender_id
     @webmail.receiver_type = 0
-    @webmail.content = @comment.content + " " + @comment.id + "" + @content + " " + @user.stu_num
+    @webmail.content = @article.abstract+ @comment.content + " " + @comment.id.to_s + "" + @content["content"] + " " + @user.stu_num.to_s
     @webmail.ifread = 0
     @webmail.save
     render nothing: true, status: 200
@@ -72,23 +74,45 @@ class UsersController < ApplicationController
   #POST /api/users/webmails/readall
   def readall
     @user = User.find_by stu_num: request.headers[:uid]
+    if @user.nil?
+        render nothing: true, status: 404
+    end
     a = []
-    Webmail.all.each do |webmail|
-       if webmail.receiver_id == @user.stu_num 
-          a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
-          format.html { render :json=>{:txt => a}.to_json }
+    Webmail.all.each do |webmail| 
+       if webmail.receiver_id.to_s == @user.stu_num 
+          a<<{:webmail_id => webmail.id,:sender_id => webmail.sender_id,:sender_name=>webmail.sender_name, :receiver_id => webmail.receiver_id,:content=>webmail.content,:if_read=>webmail.ifread}
+          #puts " dsffsg"
+          #format.html { render :json=>{:txt => a}.to_json }
        end
     end
-    render nothing: true, status: 200
+    render :json=>{:txt => a}.to_json,status: 200
   end 
+
+  def usergetcontent
+    @user = User.find_by stu_num: request.headers[:uid]
+    if @user.nil?
+        render nothing: true, status: 404
+    end
+     @webmail = Webmail.find(params[:webmail_id].to_i)
+    if @webmail.nil?
+       render text: 'Webmail not exit',status: 404
+    end
+    if @webmail.ifread==0
+       @webmail.ifread=1
+    end
+    a = []
+    a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
+    render :json=>{:txt => a}.to_json, status:200
+ 
+  end
 
   # POST /api/users/login
   def login
 #    @user = User.find_by stu_num: env["HTTP_UID"].to_i
    
     @user = User.find_by stu_num: request.headers[:uid]
-    puts params[:uid]
-    puts params[:passwd]
+    puts request.headers[:uid]
+    puts request.headers[:passwd]
     if !@user.nil? and @user.password == request.headers[:passwd]
       render :json => {:name => @user.name, :uid => @user.stu_num, :token => Digest::MD5.hexdigest("#{@user.stu_num.to_s + @user.log_num.to_s}"), :user_head => @user.user_head}
     else
