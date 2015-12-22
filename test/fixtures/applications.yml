@@ -4,8 +4,14 @@
 # model remove the '{}' from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
+one:
+   user_id: one
+   club_id: one
+   reason: 可以的
 # column: value
 #
-two: {}
+two:
+   user_id: two
+   club_id: two
+   reason: 不可以吗
 #  column: value

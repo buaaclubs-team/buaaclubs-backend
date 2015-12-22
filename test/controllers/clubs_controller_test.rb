@@ -22,13 +22,13 @@ class ClubsControllerTest < ActionController::TestCase
   test "should get memberlist" do
        @request.headers["uid"] = "lingfengshe"
        @request.headers["token"] = Digest::MD5.hexdigest("#{"lingfengshe" + 123456.to_s}")
-       post: memberlist
+       post :memberlist
        assert_response :success
   end
   test "should get applicationlist" do
         @request.headers["uid"] = "lingfengshe"
        @request.headers["token"] = Digest::MD5.hexdigest("#{"lingfengshe" + 123456.to_s}")
-        post: applicationlist
+        post :applicationlist
 
         assert_response :success
   end
@@ -38,7 +38,7 @@ class ClubsControllerTest < ActionController::TestCase
        post :acceptapplication
        assert_response :success
   end
-  end
+  
   
 end
 '''
