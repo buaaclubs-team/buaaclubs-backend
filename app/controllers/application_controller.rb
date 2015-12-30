@@ -57,7 +57,7 @@ class ApplicationController < ActionController::Base
     messagexsend.add_to("#{phone}")
     messagexsend.set_project("HpBVJ4")
     messagexsend.add_var("code", "#{code}")
-    puts messagexsend.message_xsend()}
-	render nothing: true, status: 200
+    puts messagexsend.message_xsend()
   end
+
 end

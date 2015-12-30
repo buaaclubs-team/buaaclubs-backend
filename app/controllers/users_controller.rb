@@ -2,7 +2,7 @@ class UsersController < ApplicationController
  # before_action :set_user, only: [:show, :edit, :update, :destroy]
   skip_before_filter :verify_authenticity_token
   skip_before_action :require_club_login
-  skip_before_action :require_user_login, only: [:register, :login, :checkuid]
+  skip_before_action :require_user_login, only: [:register, :login, :checkuid, :verify_phone_sendcode, :verify_phone, :verify_email, :fp_email, :fp_email_verify, :fp_phone_send, :fp_phone_verify]
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
   # POST '/api/users/phone_num/verify/code' 手机验证发送验证码
@@ -26,7 +26,7 @@ class UsersController < ApplicationController
     if @user.nil?
         render text: 'User not exist', status: 404
     end
-    if Digest::MD5.hexdigest("#{@user.phone_verify_code.to_s}") != code
+    if Digest::MD5.hexdigest("#{@user.phone_verify_code.to_s}") != @code
         @user.phone_verify = 0
         @user.save
 	render text: 'verification code wrong', status: 404
@@ -98,7 +98,7 @@ class UsersController < ApplicationController
     if @user.phone_verify == 0 then render text: 'Phone not verified', status: 401 end
     @user.phone_verify_code = rand(9999)
     @user.save
-    sendMessageVeryifyCode(@user.phone_verify_code, @user.phone_num)
+    sendMessageVeryifyCode(@user.phone_verify_code, @user.phone_num)    
     render text: 'sent', status: 200
   end
   
@@ -110,7 +110,7 @@ class UsersController < ApplicationController
     if @user.nil?
 	render text: 'User not exist', status: 404
     end
-    if Digest::MD5.hexdigest("#{@user.phone_verify_code.to_s}") != code
+    if Digest::MD5.hexdigest("#{@user.phone_verify_code.to_s}") != @code
 	@user.phone_verify = 0
 	@user.save
 	render text: 'verification failed', status: 404
@@ -141,8 +141,10 @@ class UsersController < ApplicationController
     @user.stu_num = params[:uid]
     @user.phone_num = params[:phone_num]
     @user.password = params[:passwd]
-	@user.email = params[:email]
-	@user.user_head = "http://7xob9u.com1.z0.glb.clouddn.com/defaultHead.jpg"
+    @user.email = params[:email]
+    @user.user_head = "http://7xob9u.com1.z0.glb.clouddn.com/defaultHead.jpg"
+    @user.email_verify = 0;
+    @user.phone_verify = 0;
 #    puts @user.password
     if @user.save
       UserMailer.welcome_email(@user).deliver_now
