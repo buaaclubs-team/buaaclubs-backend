@@ -2,7 +2,7 @@ class UsersController < ApplicationController
  # before_action :set_user, only: [:show, :edit, :update, :destroy]
   skip_before_filter :verify_authenticity_token
   skip_before_action :require_club_login
-  skip_before_action :require_user_login, only: [:register, :login, :checkuid, :verify_phone_sendcode, :verify_phone, :verify_email, :fp_email, :fp_email_verify, :fp_phone_send, :fp_phone_verify]
+  skip_before_action :require_user_login, only: [:register, :login, :checkuid, :detail,:statistics,:verify_phone_sendcode, :verify_phone, :verify_email, :fp_email, :fp_email_verify, :fp_phone_send, :fp_phone_verify]
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
   # POST '/api/users/phone_num/verify/code' 手机验证发送验证码
@@ -120,7 +120,29 @@ class UsersController < ApplicationController
 	redirect_to "http://www.buaaclubs.com/myWeb/myNewHomePage.html/" # 改为有参数的登陆成功页面
     end
   end
-  
+  #GET /api/users/detail
+  def detail
+     @user = User.find_by stu_num: params[:uid]
+     if @user.nil?
+        render :json => {txt:'user not exit' } ,status: 404
+     else
+        render :json => {:uid => @user.stu_num,:name => @user.name,:phone_num =>@user.phone_num,:email => @user.email,:user_head => @user.user_head,:phone_num_verify => @user.phone_verify,:email_verify => @user.email_verify},status: 404
+     end
+
+  end
+
+  #POST /api/users/statistics
+  def ststistics
+      @user = User.find_by stu_num: params[:uid]
+     if @user.nil?
+        render :json => {txt:'user not exit' } ,status: 404
+     else
+        club_num = @user.clubs.length
+        activity_num = @user.articles.length
+        render :json => {:club_num => club_num,:activity_num => activity_num},status:200
+     end
+  end
+
   # GET '/api/users/register/check/:uid'
   def checkuid
      @user = User.find_by stu_num: params[:uid]
@@ -156,6 +178,23 @@ class UsersController < ApplicationController
     end
   end
 
+   def apply
+     @club = Club.find_by club_account: params[:club_id]
+    @user = User.find_by stu_num: request.headers[:uid]
+     @content = JSON.parse(request.body.string)
+     
+     if @club.nil? or @user.nil?
+         render nothing: true, status: 404
+     end
+     @application = Application.new
+     @application.user_id = @user.id
+     @application.club_id = @club.id
+     @application.reason = @content["reason"]
+     @application.accept = -1
+     @application.save
+     render nothing: true, status: 200
+   end
+
    def inform
     @webmail = Webmail.new
     @club = Club.find_by club_account: params[:club_id]
@@ -170,7 +209,7 @@ class UsersController < ApplicationController
 
    #POST /api/users/clubs/articles/:article_id/comments/reply/:reply_id 用户评论
    def reply
-    if params[:reply_id].to_i==-1
+      if params[:reply_id].to_i==-1
        render nothing: true, status: 404
     end
     @user = User.find_by stu_num: request.headers[:uid]
@@ -178,25 +217,54 @@ class UsersController < ApplicationController
     @webmail = Webmail.new
     @webmail.sender_id =  -1
     @webmail.sender_name = "system"
-    @comment =  Comment.find_by sender_id: params[:reply_id]
+    @comment =  Comment.find_by sender_id: params[:reply_id].to_i
+    #puts params[:article_id]
+    @article = Article.find( params[:article_id].to_i)
     @webmail.receiver_id = @comment.sender_id
     @webmail.receiver_type = 0
-    @webmail.content = @comment.title + " " + @comment.id + "" + @information + " " + @user.stu_num
+    @webmail.content = @article.abstract+ @comment.content + " " + @comment.id.to_s + "" + @content["content"] + " " + @user.stu_num.to_s
     @webmail.ifread = 0
+    @webmail.save
     render nothing: true, status: 200
+
   end
 
   #POST /api/users/webmails/readall
   def readall
     @user = User.find_by stu_num: request.headers[:uid]
-    
+    if @user.nil?
+        render nothing: true, status: 404
+    end
+    a = []
     Webmail.all.each do |webmail|
-       if webmail.receiver_id == @user.stu_num && webmail.if_read
-          webmail.show
-          webmail.if_read=1;
+       if webmail.receiver_id.to_s == @user.stu_num
+          a<<{:webmail_id => webmail.id,:sender_id => webmail.sender_id,:sender_name=>webmail.sender_name, :receiver_id => webmail.receiver_id,:content=>webmail.content,:if_read=>webmail.ifread}
+          #puts " dsffsg"
+          #format.html { render :json=>{:txt => a}.to_json }
        end
     end
+    render :json=>{:txt => a}.to_json,status: 200
+
   end 
+  
+   def usergetcontent
+    @user = User.find_by stu_num: request.headers[:uid]
+    if @user.nil?
+        render nothing: true, status: 404
+    end
+     @webmail = Webmail.find(params[:webmail_id].to_i)
+    if @webmail.nil?
+       render text: 'Webmail not exit',status: 404
+    end
+    if @webmail.ifread==0
+       @webmail.ifread=1
+    end
+    a = []
+    a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
+    render :json=>{:txt => a}.to_json, status:200
+
+  end
+
 
   # POST /api/users/login
   def login

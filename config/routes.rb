@@ -1,4 +1,13 @@
 Rails.application.routes.draw do
+  
+
+
+
+
+
+  get '/api/articles/activities/:page_id' => 'clubs#clubsactivity'#返回一个社团>的活动
+  get '/api/users/clubs/abstract/:page_id' => 'clubs#clublist'#返回社团列表
+
 
   resources :comments
   resources :webmails
@@ -15,6 +24,9 @@ Rails.application.routes.draw do
   get '/api/users/forgetpassword/email/verify/:uid/:hash_code' => 'users#fp_email_verify' # 忘记密码，邮箱转跳
   post '/api/users/forgetpassword/phone_num/send' => 'users#fp_phone_send' # 忘记密码，手机
   post '/api/users/forgetpassword/phone_num/verify' => 'users#fp_phone_verify' # 忘记密码，手机
+  
+  get '/api/users/detail' => 'users#detail'#返回个人信息
+  post '/api/users/statistics' => 'users#statistics'#返回用户参加的社团个数和报名活动个数
 
   get '/api/clubs/members/all' => 'clubs#memberslist'#获取社团名单
   #发送通知
@@ -39,12 +51,14 @@ Rails.application.routes.draw do
   get '/api/clubs/:uid/articles/:page_id' => 'clubs#getabstracts'
   get '/api/users/logout' => 'users#logout'
   get '/api/clubs/logout' => 'clubs#logout'
-  post '/api/clubs/inform' => 'clubs#inform'  
-  post '/api/clubs/articles/:article_id/comments/reply/:reply_id' => 'clubs#reply' 
-  post '/api/users/articles/:article_id/comments/reply/:reply_id' => 'users#reply'  
+  post '/api/clubs/inform' => 'clubs#inform'
+  post '/api/clubs/articles/:article_id/comments/reply/:reply_id' => 'clubs#reply'
+  post '/api/users/articles/:article_id/comments/reply/:reply_id' => 'users#reply'
   post '/api/users/webmails/readall' => 'users#readall'
   post '/api/clubs/webmails/readall' => 'clubs#readall'
-
+  post '/api/users/webmails/usergetcontent/:webmail_id' => 'users#usergetcontent'
+   post '/api/clubs/webmails/clubgetcontent/:webmail_id' => 'clubs#clubgetcontent'
+  post '/api/users/clubs/apply/:club_id' => 'users#apply'
 
   post '/api/clubs/articles/detail/create' => 'articles#create'
 #  post '/api/clubs/articles/detail/:article_id/create_content' => 'articles#create_content'

@@ -10,10 +10,14 @@ class User < ActiveRecord::Base
  # validates :password, length: {in: 6..20}
  # validates :stu_num, format: {with: /([0-9]){8}/}
 
-  has_many :applications, inverse_of: :user, dependent: :destroy
+#  has_many :applications, inverse_of: :user, dependent: :destroy
+  has_many :applications, foreign_key: 'user_id', dependent: :destroy
+
   has_many :wantedclubs, class_name: 'Club',through: :applications,source: :wantedclub
 
-  has_many :lists, inverse_of: true, dependent: :destroy
+  has_many :lists,foreign_key: 'user_id', dependent: :destroy
+
+  #has_many :lists, inverse_of: true, dependent: :destroy
   has_many :clubs, through: :lists
 '''
  def stu_num_is_eight

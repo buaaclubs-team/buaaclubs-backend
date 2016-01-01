@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151217092208) do
+ActiveRecord::Schema.define(version: 20151231090703) do
 
   create_table "applications", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
@@ -52,6 +52,7 @@ ActiveRecord::Schema.define(version: 20151217092208) do
     t.integer  "log_num",      limit: 4
     t.string   "club_account", limit: 255
     t.string   "pics",         limit: 255
+    t.string   "category",     limit: 255
   end
 
   add_index "clubs", ["club_account"], name: "index_clubs_on_club_account", unique: true, using: :btree

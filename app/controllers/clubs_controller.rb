@@ -2,30 +2,102 @@ class ClubsController < ApplicationController
   skip_before_filter :verify_authenticity_token
 
   skip_before_action :require_user_login
-  skip_before_action :require_club_login, only: [:login, :getabstracts, :exportlist]
+  skip_before_action :require_club_login, only: [:login, :getabstracts, :exportlist,:clubsactivity,:clublist]
   before_action :set_club, only: [:show, :edit, :update, :destroy]
+  
+
+
+
+  def clublist
+        a = []
+        x = params[:page_id].to_i
+        if (x<1)
+            respond_to do |format|
+                format.html { render :json=>{txt: "page_id minus"}.to_json, :status => 404}
+            end
+        end
+        if x>1
+        x = (x-1)*20
+        else
+        x = 1
+        end
+   if x == 1
+      p = Club.order(created_at: :desc).limit(20)
+   else p = Club.order(created_at: :desc).limit(20).offset(x)
+   end
+    if p.length == 0
+       respond_to do |format|
+       format.html { render :json => {:txt => "Not Record"} ,:status => 404}
+       end
+    else
+       p.each{|t| a<<{:name => t.name,:head_url => t.head_url,:category => t.category} }
+       respond_to do |format|
+                 response.headers['Access-Control-Allow-Origin']="*"
+         format.html { render :json=>{:txt => a}.to_json }
+       end
+    end
+
+
+
+  end
+
+  def clubsactivity
+    a = []
+    x = params[:page_id].to_i
+    @club = Club.where(club_account: request.header["club_account"]).take
+    if (x<1)
+      respond_to do |format|
+        format.html { render :json=>{txt: "page_id minus"}.to_json, :status => 404}
+      end
+    end
+    if x>1
+      x = (x-1)*10
+    else
+      x = 1
+    end
+    if x == 1
+      p = @club.articles.order(created_at: :desc).where(type: 0).limit(10)
+    else p = @club.articles.order(created_at: :desc).where(type: 0).limit(10).offset(x)
+    end
+     if p.length == 0
+       respond_to do |format|
+       format.html { render :json => {:txt => "Not Record"} ,:status => 404}
+       end
+    else
+       p.each{|t| a<<{:article_id => t.id,:article_title => t.title,:article_abstract => t.abstract, :head_url => t.club.head_url} }
+       respond_to do |format|
+                 response.headers['Access-Control-Allow-Origin']="*"
+         format.html { render :json=>{:txt => a}.to_json }
+       end
+    end
+
+
+  end
+
+
 
   def exportlist
-	@club = Club.where(club_account: request.headers[:uid]).take
-#	 @club = Club.where(club_account: 'test1 account').take
+        @club = Club.where(club_account: request.headers[:uid]).take
+#        @club = Club.where(club_account: 'test1 account').take
 
-	 if @club.nil?
+         if @club.nil?
            render text: 'Club not exit',status: 404
         end
         puts @club.club_account
         @members = @club.members
         if @members.length < 1
-	   render text: 'Club no members',status: 404
+           render text: 'Club no members',status: 404
         else
-	   respond_to do |format|
-		format.html{		
-		  send_data(xls_content_for(@members),
-			   :type => "text/excel;charset=utf-8;header=present",
-			   :filename => "list_Users_#{Time.now.strftime("%Y%m%d")}.xls")
+           respond_to do |format|
+                format.html{
+                  send_data(xls_content_for(@members),
+                           :type => "text/excel;charset=utf-8;header=present",
+                           :filename => "list_Users_#{Time.now.strftime("%Y%m%d")}.xls")
                 }
-	    end
+            end
         end
   end
+
   def memberslist
         m = []
         @club = Club.where(club_account: request.headers[:uid]).take
@@ -43,22 +115,23 @@ class ClubsController < ApplicationController
         respond_to do |format|
          format.html { render :json=>{:txt => m}.to_json }
         end
-  end  
+  end
+  
 
   def forcequit
         @club = Club.where(club_account: request.headers[:uid]).take
         if @club.nil?
            render text: 'Club not exit',status: 404
         end
- 	suc = false
+        suc = false
         @members_id = JSON.parse(request.body.string)
         @members_id["uids"].each{|temp_id|
                                  member = User.find_by stu_num: temp_id
                                  find = false
                                  @club.lists.each{|temp_note| if temp_note.user_id == member.id
-              							 find = true                                                                  
-  								 temp_note.destroy
-								 end}
+                                                                 find = true
+                                                                 temp_note.destroy
+                                                                 end}
                                  if !find
                                     suc = true
                                     render text: 'Member not exit',status: 404
@@ -69,69 +142,91 @@ class ClubsController < ApplicationController
         end
   end
 
-  def applicationlist#获取申请人列表，注意是还没有处理的申请人列表
-	apps = []
-	@club = Club.where(club_account: request.headers[:uid]).take
+  
+def applicationlist#获取申请人列表，注意是还没有处理的申请人列表
+        apps = []
+        @club = Club.where(club_account: request.headers[:uid]).take
         if @club.nil?
            render text: 'Club not exit',status: 404
         end
-	@applicants = @club.applicants
+        @applicants = @club.applicants
         num = @applicants.length - 1
         (0..num).each{|t| if Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).length < 2
                                 apps << {:uid => @applicants[t].stu_num,
                                       :name => @applicants[t].name,
                                       :user_head => @applicants[t].user_head,
                                       :time => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.created_at,
- 				      :reason => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.reason}
+                                      :reason => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.reason}
                           end
                      }
         respond_to do |format|
-         	format.html { render :json=>{:txt => apps}.to_json }
+                format.html { render :json=>{:txt => apps}.to_json }
         end
 
   end
 
-  def acceptapplication
-	@club = Club.where(club_account: request.headers[:uid]).take
+    def acceptapplication
+        @club = Club.where(club_account: request.headers[:uid]).take
         if @club.nil?
-           render text: 'Club not exit',status: 404
-        end
-	if User.find(params[:user_id].to_i).nil?
-	   render text: 'User not exit',status: 404
-        end
-        if List.where(club_id: @club.id,user_id: params[:user_id].to_i).take.nil?
-           render text: 'the person already one of club',status: 404
-        end
-        @Application = Application.where({club_id: @club.id,user_id: params[:user_id].to_i,accept: nil}).take
-        if @Application.nil?
-           render text: 'Application not exist',status: 404
-        end
-	@Application.accept = 1
-        @Application.save
-        @list = List.new
-        @list.user_id = params[:user_id].to_i
-	@list.club_id = @club.id
- 	@list.save
+                        render text: 'Club not exit',status: 404
+                end
+
+        @users_id["uids"].each{|temp_id|
+                @user = User.find_by stu_num: temp_id
+                if @user.nil?
+                        render text: 'User not exit',status: 404
+                end
+                if List.where(club_id: @club.id,user_id: @user.id).take.nil?
+                        render text: 'the person already one of club',status: 404
+                end
+                @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: nil}).take
+                if @Application.nil?
+                        render text: 'Application not exist',status: 404
+                end
+                @list = List.new
+                @list.user_id = @user.id
+                @list.club_id = @club.id
+                @list.save
+                @Application.destroy
+                @webmail = Webmail.new
+                @webmail.sender_id = -1;
+                @webmail.sender_name = '系统'
+                @webmail.receiver_id = @user.id
+                @webmail.content = "您报名的社团" +@club.name + "批准了您的加入请求"
+                @webmail.ifread = 0;
+                @webmail.save;
+        }
         render text: 'success',status: 200
   end
+
   def refuseapplication
-	@club = Club.where(club_account: request.headers[:uid]).take
+        @club = Club.where(club_account: request.headers[:uid]).take
         if @club.nil?
            render text: 'Club not exit',status: 404
         end
-        if User.find(params[:user_id].to_i).nil?
-           render text: 'User not exit',status: 404
-        end
-        @Application = Application.where({club_id: @club.id,user_id: params[:user_id].to_i,accept: nil}).take
-        if @Application.nil?
-           render text: 'Application not exist',status: 404
-        end
-        @Application.accept = 0
-	@Application.save
+        @users_id["uids"].each{|temp_id|
+
+                if @user.nil?
+                        render text: 'User not exit',status: 404
+                end
+                @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: nil}).take
+                if @Application.nil?
+                        render text: 'Application not exist',status: 404
+                end
+                @Application.destroy
+                @webmail = Webmail.new
+                @webmail.sender_id = -1;
+                @webmail.sender_name = '系统'
+                @webmail.receiver_id = @user.id
+                @webmail.content = "您报名的社团" +@club.name + "拒绝了您的加入请求"
+                @webmail.ifread = 0;
+                @webmail.save
+         }
         render text: 'success',status: 200
 
 
   end
+
 # POST 
   def sendemail
 	@club = Club.where(club_account: request.headers[:uid]).take.name
@@ -200,6 +295,7 @@ class ClubsController < ApplicationController
         @webmail.content = @information
         @webmail.ifread = 0
       }
+      @inform.users = a.to_json
     else
       if kind == 1
           $LOAD_PATH.unshift(File.dirname(__FILE__)) unless $LOAD_PATH.include?(File.dirname(__FILE__))
@@ -238,7 +334,7 @@ class ClubsController < ApplicationController
  
   #POST /api/clubs/articles/:article_id/comments/reply/:reply_id 社团回复
   def reply
-    if params[:reply_id].to_i==-1
+     if params[:reply_id].to_i==-1
        render nothing: true, status: 404
     end
     @club = Club.find_by club_account: request.headers[:uid]
@@ -246,24 +342,48 @@ class ClubsController < ApplicationController
     @webmail = Webmail.new
     @webmail.sender_id =  -1
     @webmail.sender_name = "system"
-    @comment =  Comment.find_by sender_id: params[:reply_id]
+    @comment =  Comment.find_by sender_id: params[:reply_id].to_i
     @webmail.receiver_id = @comment.sender_id
+    @article = Article.find( params[:article_id].to_i)
     @webmail.receiver_type = 0
-    @webmail.content = @comment.title + " " + @comment.id + "" + @information + " " + @club.name
+    @webmail.content = @article.abstract+ @comment.content + " " + @comment.id.to_s + "" + @content["content"] + " " + @user.stu_num.to_s
     @webmail.ifread = 0
+    @webmail.save
     render nothing: true, status: 200
+
   end
 
   # POST /api/clubs/webmails/readall
   def readall
-    @club = User.find_by club_account: request.headers[:uid]
-
+    @club = Club.find_by club_account: request.headers[:uid]
+    if @club.nil?
+        render nothing: true, status: 404
+    end
+    a =[]
     Webmail.all.each do |webmail|
-       if webmail.receiver_id == @club.id && webmail.if_read
-          webmail.show
-          webmail.if_read=1;
+       if webmail.receiver_id == @club.id
+         a<<{:webmail_id => webmail.id,:sender_id => webmail.sender_id,:sender_name=>webmail.sender_name, :receiver_id => webmail.receiver_id,:content=>webmail.content,:if_read=>webmail.ifread}
+         #format.html { render :json=>{:txt => a}.to_json }
        end
     end
+     render :json=>{:txt=>a}.to_json, status: 200
+  end
+
+  def clubgetcontent
+    @club = Club.find_by club_account: request.headers[:uid]
+    if @club.nil?
+        render nothing: true, status: 404
+    end
+    @webmail = Webmail.find(params[:webmail_id].to_i)
+    if @webmail.nil?
+       render text: 'Webmail not exit',status: 404
+    end
+    if @webmail.ifread==0
+       @webmail.ifread=1
+    end
+    a = []
+    a<<{:webmail_id => @webmail.id,:sender_id => @webmail.sender_id,:sender_name=>@webmail.sender_name, :receiver_id => @webmail.receiver_id,:content=>@webmail.content,:if_read=>@webmail.ifread}
+    render :json=>{:txt => a}.to_json, status:200
   end
  
 
