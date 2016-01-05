@@ -5,7 +5,7 @@ Rails.application.routes.draw do
  
   match '/api/*other' => 'notes#opt', via: [:options]
 
-  get '//api/users/clubs/abstracts/:category' => 'clubs#clubsbycategory' #按社团类别返回对应的社团列表
+  get '/api/users/clubs/abstracts/:category' => 'clubs#clubsbycategory' #按社团类别返回对应的社团列表
   get '/api/articles/activities/:page_id' => 'clubs#clubsactivity'#返回一个社团>的活动
   get '/api/users/clubs/abstract/:page_id' => 'clubs#clublist'#返回社团列表
 
@@ -33,7 +33,7 @@ Rails.application.routes.draw do
   #发送通知
   get 'api/clubs/users/export/:uid' => 'clubs#exportlist' #导出名单
   post '/api/clubs/members/forcequit' => 'clubs#forcequit' #强制退社
-  get '/api/clubs/members/apply' => 'clubs#applicantlist' #申请人列表
+  get '/api/clubs/members/apply' => 'clubs#applicationlist' #申请人列表
   get '/api/clubs/members/apply/accept' => 'clubs#acceptapplication'#同意申请
   get '/api/clubs/member/apply/refuse' => 'clubs#refuseapplication'#拒绝申请  
 

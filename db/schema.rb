@@ -25,10 +25,10 @@ ActiveRecord::Schema.define(version: 20151231090703) do
   create_table "articles", force: :cascade do |t|
     t.integer  "club_id",    limit: 4
     t.string   "title",      limit: 255
-    t.string   "abstract",   limit: 255
-    t.string   "content",    limit: 255
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+    t.text     "abstract",   limit: 65535
+    t.text     "content",    limit: 4294967295
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
     t.integer  "type",       limit: 4
     t.date     "deadline"
   end
@@ -87,6 +87,8 @@ ActiveRecord::Schema.define(version: 20151231090703) do
     t.datetime "created_at",           null: false
     t.datetime "updated_at",           null: false
   end
+
+  add_index "lists", ["user_id", "club_id"], name: "index_lists_on_user_id_and_club_id", unique: true, using: :btree
 
   create_table "notes", force: :cascade do |t|
     t.integer  "user_id",    limit: 4

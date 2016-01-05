@@ -143,6 +143,7 @@ class ArticlesController < ApplicationController
    end
     respond_to do |format|
          format.html { render :json => {:title => @detail.title,:content => @detail.content, :head_url => @detail.club.head_url, :date => @detail.deadline, :type => @detail.type}.to_json }
+         puts @detail.type
          end
   end
 
@@ -165,7 +166,7 @@ class ArticlesController < ApplicationController
           end
      respond_to do |format|
            if state == 200
-           format.html { render :json => {:article_title => art.title,:content => art.content }.to_json  }
+              format.html { render :json => {:title => art.title,:content => art.content, :head_url => art.club.head_url, :date => art.deadline, :type => art.type}.to_json }
            else
            format.html { render nothing: true, status: 401 }
            format.json { render json: @article.errors, status: :unprocessable_entity }
@@ -220,6 +221,8 @@ class ArticlesController < ApplicationController
    sss[:content] = @body["content"]
    sss[:abstract] = @body["abstract"]
    sss[:club_id] = clu.id
+   sss[:type] = @body["type"]
+   sss[:deadline] = @body["date"]
    puts sss[:title]
    puts sss[:content]
    puts sss[:abstract]

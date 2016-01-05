@@ -28,7 +28,7 @@ class ClubsController < ApplicationController
        format.html { render :json => {:txt => "Not Record"} ,:status => 404}
        end
     else
-       p.each{|t| a<<{:name => t.name,:head_url => t.head_url,:category => t.category,:club_num => (t.members).size} }
+       p.each{|t| a<<{:club_account => t.club_account,:name => t.name,:head_url => t.head_url,:category => t.category,:club_num => (t.members).size} }
        respond_to do |format|
                  response.headers['Access-Control-Allow-Origin']="*"
          format.html { render :json=>{:txt => a}.to_json }
@@ -180,13 +180,13 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
         end
         @applicants = @club.applicants
         num = @applicants.length - 1
-        (0..num).each{|t| if Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).length < 2
+        (0..num).each{|t|
                                 apps << {:uid => @applicants[t].stu_num,
                                       :name => @applicants[t].name,
                                       :user_head => @applicants[t].user_head,
-                                      :time => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.created_at,
-                                      :reason => Application.where({club_id: @club.id,user_id: @applicants[t].id,accept: nil}).take.reason}
-                          end
+                                      :time => Application.where(club_id: @club.id,user_id: @applicants[t].id,accept:-1).take.created_at.localtime.to_s,
+                                      :reason => Application.where(club_id: @club.id,user_id: @applicants[t].id,accept: -1).take.reason}
+                         
                      }
         respond_to do |format|
                 format.html { render :json=>{:txt => apps}.to_json }
@@ -367,11 +367,13 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
     @content = JSON.parse(request.body.string)
     @comment = Comment.new
     @comment.article_id = params[:article_id]
-    @comment.sender_id = @club_id
+    @comment.sender_id = @club.id
     @comment.sender_type = 1
     @comment.content = @content["content"]
     @comment.reply_id = params[:reply_id]
-    @comment.save
+    if !@comment.save
+      render nothing: true, status: 400
+    end
     if @comment.reply_id != -1
     @comment =  Comment.find_by sender_id: params[:reply_id].to_i
     if @comment.sender_type != 1
