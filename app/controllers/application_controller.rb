@@ -9,6 +9,7 @@ class ApplicationController < ActionController::Base
 
   def add_access_allow
     response.headers['Access-Control-Allow-Origin'] = "*"
+    response.headers['Access-Control-Allow-Credentials'] = "true"
   end
 
   # 验证用户账户登录信息
@@ -58,6 +59,16 @@ class ApplicationController < ActionController::Base
     messagexsend.set_project("HpBVJ4")
     messagexsend.add_var("code", "#{code}")
     puts messagexsend.message_xsend()
+  end
+
+  def cutLastNine(a)
+    i = 0
+    num = 8
+    until i > num do
+      a = a.chop
+      i += 1
+    end
+    return a
   end
 
 end

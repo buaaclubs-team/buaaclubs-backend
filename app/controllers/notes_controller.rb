@@ -1,8 +1,22 @@
 class NotesController < ApplicationController
   skip_before_filter :verify_authenticity_token
-  skip_before_action :require_user_login, only: [:index, :show, :new]
+  skip_before_action :require_user_login, only: [:index, :show, :new,:opt]
   skip_before_action :require_club_login
   before_action :set_note, only: [:show, :edit, :update, :destroy]
+
+
+     def opt
+     # s = request.headers['Access-Control-Allow-Headers']
+      response.headers['Access-Control-Allow-Method'] = "GET,POST,PUT"
+      response.headers['Access-Control-Allow-Headers'] = "uid,token,content-type"
+ 
+  #    response.headers['Access-Control-Max-Age'] = 30
+ 
+      redirect_to  status: 204
+ 
+    end
+
+
 
   # GET /notes
   # GET /notes.json

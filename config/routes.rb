@@ -2,9 +2,10 @@ Rails.application.routes.draw do
   
 
 
+ 
+  match '/api/*other' => 'notes#opt', via: [:options]
 
-
-
+  get '//api/users/clubs/abstracts/:category' => 'clubs#clubsbycategory' #按社团类别返回对应的社团列表
   get '/api/articles/activities/:page_id' => 'clubs#clubsactivity'#返回一个社团>的活动
   get '/api/users/clubs/abstract/:page_id' => 'clubs#clublist'#返回社团列表
 
@@ -30,11 +31,11 @@ Rails.application.routes.draw do
 
   get '/api/clubs/members/all' => 'clubs#memberslist'#获取社团名单
   #发送通知
-  post 'api/clubs/users/export' => 'clubs#exportlist' #导出名单
+  get 'api/clubs/users/export/:uid' => 'clubs#exportlist' #导出名单
   post '/api/clubs/members/forcequit' => 'clubs#forcequit' #强制退社
   get '/api/clubs/members/apply' => 'clubs#applicantlist' #申请人列表
-  get '/api/clubs/members/apply/accept/:user_id' => 'clubs#acceptapplication'#同意申请
-  get '/api/clubs/member/apply/refuse/:user_id' => 'clubs#refuseapplication'#拒绝申请  
+  get '/api/clubs/members/apply/accept' => 'clubs#acceptapplication'#同意申请
+  get '/api/clubs/member/apply/refuse' => 'clubs#refuseapplication'#拒绝申请  
 
   resources :informs
   resources :applications
@@ -46,7 +47,7 @@ Rails.application.routes.draw do
   post '/api/register' => 'users#register'
   post '/api/clubs/login' => 'clubs#login'
   post '/api/users/login' => 'users#login'
-  get '/api/articles/:page_id' => 'articles#abstracts'
+  get '/api/articles/:page_id/:club_id/:kind' => 'articles#abstracts'
   get '/api/articles/detail/:article_id' => 'articles#detail'
   get '/api/clubs/:uid/articles/:page_id' => 'clubs#getabstracts'
   get '/api/users/logout' => 'users#logout'

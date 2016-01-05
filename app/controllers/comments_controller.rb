@@ -1,22 +1,27 @@
 class CommentsController < ApplicationController
   before_action :set_comment, only: [:show, :edit, :update, :destroy]
+  skip_before_action :require_user_login
+  skip_before_action :require_club_login
+
 
   # GET /api/articles/:article_id/comments 获取当前文章的评论
   def getcomments
     @article = Article.find(params[:article_id].to_i)
     list = []
-    @article.commenets.each{|temp|
+    @article.comments.each{|temp|
 				 if(temp.sender_type == 1)
 				   @sender = Club.find(temp.sender_id)
+				   time = 
 				   list <<{
 					:uid => @sender.club_account,
 					:type => 1,
 					:name => @sender.name,
 		 			:user_head => @sender.head_url,
 					:content => temp.content,
-					:time => temp.created_at,
+					:time => cutLastNine(temp.created_at.localtime.to_s),
 					:comment_id => temp.id
 					}
+                                    puts temp.created_at.localtime.to_s
 				 else
 				   @sender = User.find(temp.sender_id)
 				   list <<{
@@ -25,9 +30,10 @@ class CommentsController < ApplicationController
                                         :name => @sender.name,
                                         :user_head => @sender.user_head,
                                         :content => temp.content,
-                                        :time => temp.created_at,
+                                        :time => cutLastNine(temp.created_at.localtime.to_s),
                                         :comment_id => temp.id
                                         }
+				  puts temp.created_at.localtime.to_s
 				 end
     }
     render :json => {:txt => list}.to_json

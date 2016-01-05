@@ -2,11 +2,40 @@ class ClubsController < ApplicationController
   skip_before_filter :verify_authenticity_token
 
   skip_before_action :require_user_login
-  skip_before_action :require_club_login, only: [:login, :getabstracts, :exportlist,:clubsactivity,:clublist]
+  skip_before_action :require_club_login, only: [:login, :getabstracts,:exportlist,:clubsactivity,:clublist,:clubsbycategory]
   before_action :set_club, only: [:show, :edit, :update, :destroy]
   
 
+  def clubsbycategory
+      a = []
+      #  x = params[:page_id].to_i
+       # if (x<1)
+       #     respond_to do |format|
+       #         format.html { render :json=>{txt: "page_id minus"}.to_json, :status => 404}
+       #     end
+       # end
+       # if x>1
+       # x = (x-1)*20
+       # else
+       # x = 1
+       # end
+  # if x == 1
+      p = Club.where(category: params[:category])
+  # else p = Club.order(created_at: :desc).limit(20).offset(x)
+  # end
+    if p.length == 0
+       respond_to do |format|
+       format.html { render :json => {:txt => "Not Record"} ,:status => 404}
+       end
+    else
+       p.each{|t| a<<{:name => t.name,:head_url => t.head_url,:category => t.category,:club_num => (t.members).size} }
+       respond_to do |format|
+                 response.headers['Access-Control-Allow-Origin']="*"
+         format.html { render :json=>{:txt => a}.to_json }
+       end
+    end
 
+  end
 
   def clublist
         a = []
@@ -77,13 +106,13 @@ class ClubsController < ApplicationController
 
 
   def exportlist
-        @club = Club.where(club_account: request.headers[:uid]).take
+        @club = Club.where(club_account: params[:uid]).take
 #        @club = Club.where(club_account: 'test1 account').take
-
+         
          if @club.nil?
            render text: 'Club not exit',status: 404
         end
-        puts @club.club_account
+        
         @members = @club.members
         if @members.length < 1
            render text: 'Club no members',status: 404
@@ -111,7 +140,7 @@ class ClubsController < ApplicationController
                               :phone_num => @members[t].phone_num,
                               :email => @members[t].email,
                               :user_head => @members[t].user_head,
-                              :time => List.where({club_id: @club.id,user_id: @members[t].id}).take.created_at}}
+                              :time => List.where({club_id: @club.id,user_id: @members[t].id}).take.created_at.localtime.to_s}}
         respond_to do |format|
          format.html { render :json=>{:txt => m}.to_json }
         end
@@ -320,13 +349,13 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
             puts messagexsend.message_xsend()
        }
       else
-        @article = Article.find(@content["article_id"]).title
+
           @content["uids"].each{|uid|
             @user = User.find_by stu_num: uid
             if @user.email_verify ==0
                render nothing: true, status: 405
             end         
-            UserMailer.inform_email(@club,@article,@information,@user).deliver_now          }
+            UserMailer.inform_email(@club,@information,@user).deliver_now          }
       end
     end
     render nothing: true, status: 200
@@ -334,21 +363,30 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
  
   #POST /api/clubs/articles/:article_id/comments/reply/:reply_id 社团回复
   def reply
-     if params[:reply_id].to_i==-1
-       render nothing: true, status: 404
-    end
     @club = Club.find_by club_account: request.headers[:uid]
     @content = JSON.parse(request.body.string)
+    @comment = Comment.new
+    @comment.article_id = params[:article_id]
+    @comment.sender_id = @club_id
+    @comment.sender_type = 1
+    @comment.content = @content["content"]
+    @comment.reply_id = params[:reply_id]
+    @comment.save
+    if @comment.reply_id != -1
+    @comment =  Comment.find_by sender_id: params[:reply_id].to_i
+    if @comment.sender_type != 1
     @webmail = Webmail.new
     @webmail.sender_id =  -1
     @webmail.sender_name = "system"
-    @comment =  Comment.find_by sender_id: params[:reply_id].to_i
+    
     @webmail.receiver_id = @comment.sender_id
     @article = Article.find( params[:article_id].to_i)
     @webmail.receiver_type = 0
-    @webmail.content = @article.abstract+ @comment.content + " " + @comment.id.to_s + "" + @content["content"] + " " + @user.stu_num.to_s
+    @webmail.content = "您在"+@article.title+"中的评论："+ @comment.content + " >收到一则回复"
     @webmail.ifread = 0
     @webmail.save
+    end
+    end
     render nothing: true, status: 200
 
   end
@@ -403,7 +441,7 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
     a = []
     @club = Club.where(club_account: params[:uid]).take
     puts "-----------------------"
-    puts @club.id
+    
     x = params[:page_id].to_i
     if x>1
       x = (x-1)*5

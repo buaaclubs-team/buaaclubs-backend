@@ -209,22 +209,31 @@ class UsersController < ApplicationController
 
    #POST /api/users/clubs/articles/:article_id/comments/reply/:reply_id 用户评论
    def reply
-      if params[:reply_id].to_i==-1
-       render nothing: true, status: 404
-    end
-    @user = User.find_by stu_num: request.headers[:uid]
+
+    @comment = Comment.new
+    @comment.article_id = params[:article_id]
+    @comment.reply_id = params[:reply_id]
     @content = JSON.parse(request.body.string)
+    @comment.content = @content["content"]
+    @user = User.find_by stu_num: request.headers[:uid]
+    @comment.sender_id = @user.id
+    @comment.sender_type = 0
+    @comment.save
+    if @comment.reply_id != -1
+    @comment =  Comment.find_by sender_id: params[:reply_id].to_i
+    if @comment.sender_type != 1
     @webmail = Webmail.new
     @webmail.sender_id =  -1
     @webmail.sender_name = "system"
-    @comment =  Comment.find_by sender_id: params[:reply_id].to_i
     #puts params[:article_id]
     @article = Article.find( params[:article_id].to_i)
     @webmail.receiver_id = @comment.sender_id
     @webmail.receiver_type = 0
-    @webmail.content = @article.abstract+ @comment.content + " " + @comment.id.to_s + "" + @content["content"] + " " + @user.stu_num.to_s
+    @webmail.content = "您在"+@article.title+"中的评论："+ @comment.content + " 收到一则回复"
     @webmail.ifread = 0
     @webmail.save
+    end
+    end
     render nothing: true, status: 200
 
   end

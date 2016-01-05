@@ -81,16 +81,45 @@ class ArticlesController < ApplicationController
     end
   # y = Article.last.id.to_i
    # @abstracts = Article.find([x,x+9])
-   if x == 1
-      p = Article.order(created_at: :desc).limit(5)
-   else p = Article.order(created_at: :desc).limit(5).offset(x)
+    if x == 1
+      if params[:kind].to_i !=2 and  params[:club_id]!="-1"
+         #puts params[:club_id]
+         p = Article.where(type: params[:kind].to_i , club_id: (Club.find_by club_account: params[:club_id]).id).order(created_at: :desc).limit(5)
+      end
+      if params[:kind].to_i !=2 and  params[:club_id]=="-1"
+         puts params[:kind].to_i
+        p = Article.where(type: params[:kind].to_i).order(created_at: :desc).limit(5)
+         puts p.length
+      end
+      if params[:kind].to_i ==2 and  params[:club_id]!="-1"
+         p = Article.where(club_id: (Club.find_by club_account: params[:club_id]).id).order(created_at: :desc).limit(5)
+      else
+         if params[:kind].to_i ==2 and  params[:club_id]=="-1"
+         p = Article.order(created_at: :desc).limit(5)
+         end
+      end
+   else
+      if params[:kind].to_i !=2 and  params[:club_id]!="-1"
+         p = Article.where(type: params[:kind].to_i , club_id: (Club.find_by club_account: params[:club_id]).id).order(created_at: :desc).limit(5).offset(x)
+      end
+      if params[:kind].to_i !=2 and  params[:club_id]=="-1"
+        p = Article.where(type: params[:kind].to_i).order(created_at: :desc).limit(5).offset(x)
+      end
+      if params[:kind].to_i ==2 and  params[:club_id]!="-1"
+         p = Article.where(club_id: (Club.find_by club_account: params[:club_id]).id).order(created_at: :desc).limit(5).offset(x)
+      else
+         if params[:kind].to_i ==2 and  params[:club_id]=="-1"
+         p = Article.order(created_at: :desc).limit(5).offset(x)
+         end
+      end
    end
+     puts p.length
     if p.length == 0
        respond_to do |format|
        format.html { render :json => {:txt => "Not Record"} ,:status => 404}
        end
     else
-       p.each{|t| a<<{:article_id => t.id,:article_title => t.title,:article_abstract => t.abstract, :head_url => t.club.head_url} }
+       p.each{|t| a<<{:article_id => t.id,:article_title => t.title,:article_abstract => t.abstract, :head_url => t.club.head_url, :article_type => t.type, :club_name => Club.find(t.club_id).name, :time => t.created_at.localtime.to_s} }
        respond_to do |format|
 		 response.headers['Access-Control-Allow-Origin']="*"
          format.html { render :json=>{:txt => a}.to_json }
@@ -113,7 +142,7 @@ class ArticlesController < ApplicationController
      @detail.content = ""
    end
     respond_to do |format|
-         format.html { render :json => {:title => @detail.title,:content => @detail.content, :head_url => @detail.club.head_url}.to_json }
+         format.html { render :json => {:title => @detail.title,:content => @detail.content, :head_url => @detail.club.head_url, :date => @detail.deadline, :type => @detail.type}.to_json }
          end
   end
 
@@ -163,6 +192,8 @@ class ArticlesController < ApplicationController
     @article.title = @body["title"]
     @article.content = @body["content"]
     @article.abstract = @body["abstract"]
+    @article.type = @body["type"]
+    @article.deadline = @body["date"]
     clu = Club.find_by club_account: request.headers["uid"]
     @article.club_id = clu.id
     respond_to do |format|
