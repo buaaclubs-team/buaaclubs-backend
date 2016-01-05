@@ -196,27 +196,32 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
 
     def acceptapplication
         @club = Club.where(club_account: request.headers[:uid]).take
+        suc = 0
         if @club.nil?
                         render text: 'Club not exit',status: 404
                 end
-
+        @users_id = JSON.parse(request.body.string)
         @users_id["uids"].each{|temp_id|
                 @user = User.find_by stu_num: temp_id
                 if @user.nil?
-                        render text: 'User not exit',status: 404
+                        suc = 1
+           #             render text: 'User not exit',status: 404
                 end
                 if List.where(club_id: @club.id,user_id: @user.id).take.nil?
-                        render text: 'the person already one of club',status: 404
+                        suc = 1
+            #            render text: 'the person already one of club',status: 404
                 end
-                @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: nil}).take
+                @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: -1}).take
                 if @Application.nil?
-                        render text: 'Application not exist',status: 404
+                        suc = 1
+             #           render text: 'Application not exist',status: 404
                 end
+                @Application.destroy
                 @list = List.new
                 @list.user_id = @user.id
                 @list.club_id = @club.id
                 @list.save
-                @Application.destroy
+                
                 @webmail = Webmail.new
                 @webmail.sender_id = -1;
                 @webmail.sender_name = '系统'
@@ -225,22 +230,30 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
                 @webmail.ifread = 0;
                 @webmail.save;
         }
-        render text: 'success',status: 200
+        if suc = 0
+        	render text: 'success',status: 200
+        else
+          render text: 'sme wrrors',status: 404
+	end
   end
 
   def refuseapplication
         @club = Club.where(club_account: request.headers[:uid]).take
+        suc = 0
         if @club.nil?
            render text: 'Club not exit',status: 404
         end
+        @users_id = JSON.parse(request.body.string)
         @users_id["uids"].each{|temp_id|
-
+                @user = User.find_by stu_num: temp_id
                 if @user.nil?
-                        render text: 'User not exit',status: 404
+			suc = 1
+                      #  render text: 'User not exit',status: 404
                 end
-                @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: nil}).take
+                @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: -1}).take
                 if @Application.nil?
-                        render text: 'Application not exist',status: 404
+			suc = 1
+                       # render text: 'Application not exist',status: 404
                 end
                 @Application.destroy
                 @webmail = Webmail.new
@@ -251,9 +264,11 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
                 @webmail.ifread = 0;
                 @webmail.save
          }
+        if suc = 0
         render text: 'success',status: 200
-
-
+	else
+        render text: 'error',status: 404
+	end
   end
 
 # POST 

@@ -34,8 +34,8 @@ Rails.application.routes.draw do
   get 'api/clubs/users/export/:uid' => 'clubs#exportlist' #导出名单
   post '/api/clubs/members/forcequit' => 'clubs#forcequit' #强制退社
   get '/api/clubs/members/apply' => 'clubs#applicationlist' #申请人列表
-  get '/api/clubs/members/apply/accept' => 'clubs#acceptapplication'#同意申请
-  get '/api/clubs/member/apply/refuse' => 'clubs#refuseapplication'#拒绝申请  
+  post '/api/clubs/members/apply/accept' => 'clubs#acceptapplication'#同意申请
+  post '/api/clubs/members/apply/refuse' => 'clubs#refuseapplication'#拒绝申请  
 
   resources :informs
   resources :applications
