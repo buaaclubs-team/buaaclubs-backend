@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151231090703) do
+ActiveRecord::Schema.define(version: 20160109175520) do
 
   create_table "applications", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
@@ -99,6 +99,20 @@ ActiveRecord::Schema.define(version: 20151231090703) do
   end
 
   add_index "notes", ["user_id", "article_id"], name: "index_notes_on_user_id_and_article_id", unique: true, using: :btree
+
+  create_table "phone_nums", force: :cascade do |t|
+    t.string   "phone_num",        limit: 255
+    t.integer  "phone_verify_num", limit: 4
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at",                   null: false
+  end
+
+  create_table "phones", force: :cascade do |t|
+    t.string   "phone_num",        limit: 255
+    t.integer  "phone_verify_num", limit: 4
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at",                   null: false
+  end
 
   create_table "users", force: :cascade do |t|
     t.string   "stu_num",           limit: 255

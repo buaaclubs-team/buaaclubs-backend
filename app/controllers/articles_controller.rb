@@ -119,7 +119,7 @@ class ArticlesController < ApplicationController
        format.html { render :json => {:txt => "Not Record"} ,:status => 404}
        end
     else
-       p.each{|t| a<<{:article_id => t.id,:article_title => t.title,:article_abstract => t.abstract, :head_url => t.club.head_url, :article_type => t.type, :club_name => Club.find(t.club_id).name, :time => t.created_at.localtime.to_s} }
+       p.each{|t| a<<{:article_id => t.id,:article_title => t.title,:article_abstract => t.abstract, :head_url => t.club.head_url, :article_type => t.type, :club_name => Club.find(t.club_id).name, :time => cutLastNine(t.created_at.localtime.to_s)} }
        respond_to do |format|
 		 response.headers['Access-Control-Allow-Origin']="*"
          format.html { render :json=>{:txt => a}.to_json }
@@ -142,9 +142,9 @@ class ArticlesController < ApplicationController
      @detail.content = ""
    end
     respond_to do |format|
-         format.html { render :json => {:title => @detail.title,:content => @detail.content, :head_url => @detail.club.head_url, :date => @detail.deadline, :type => @detail.type}.to_json }
+         format.html { render :json => {:title => @detail.title,:content => @detail.content, :head_url => @detail.club.head_url, :time => cutLastNine(@detail.created_at.localtime.to_s), :type => @detail.type}.to_json }
          puts @detail.type
-         end
+   end
   end
 
   

@@ -3,16 +3,19 @@ Rails.application.routes.draw do
 
 
  
+  resources :phone_nums
   match '/api/*other' => 'notes#opt', via: [:options]
 
   get '/api/users/clubs/abstracts/:category' => 'clubs#clubsbycategory' #按社团类别返回对应的社团列表
   get '/api/articles/activities/:page_id' => 'clubs#clubsactivity'#返回一个社团>的活动
   get '/api/users/clubs/abstract/:page_id' => 'clubs#clublist'#返回社团列表
-
+  get '/api/clubs/detail' => 'clubs#returnmm'  #返回社团人数
 
   resources :comments
   resources :webmails
   resources :lists
+
+  post '/api/users/register/checkiden' => 'users#checkiden' # 实名验证
 
   get '/api/articles/:article_id/comments' => 'comments#getcomments' # 获得当前文章评论
 
@@ -28,6 +31,8 @@ Rails.application.routes.draw do
   
   get '/api/users/detail' => 'users#detail'#返回个人信息
   post '/api/users/statistics' => 'users#statistics'#返回用户参加的社团个数和报名活动个数
+  get '/api/users/clubs/all' => 'users#clublist'  
+  get '/api/users/articles/activities/all' => 'users#activitylist'
 
   get '/api/clubs/members/all' => 'clubs#memberslist'#获取社团名单
   #发送通知
@@ -43,7 +48,7 @@ Rails.application.routes.draw do
 
   #post '/api/clubs/sendmessage' => 'clubs#sendmessage'
   #post '/api/clubs/sendemail' => 'clubs#sendemail'
-  get '/api/users/register/check/:uid' => 'user#checkuid'
+  get '/api/users/register/check/:uid' => 'users#checkuid'
   post '/api/register' => 'users#register'
   post '/api/clubs/login' => 'clubs#login'
   post '/api/users/login' => 'users#login'
@@ -60,7 +65,9 @@ Rails.application.routes.draw do
   post '/api/users/webmails/usergetcontent/:webmail_id' => 'users#usergetcontent'
    post '/api/clubs/webmails/clubgetcontent/:webmail_id' => 'clubs#clubgetcontent'
   post '/api/users/clubs/apply/:club_id' => 'users#apply'
+  get '/api/users/articles/activities/cancel/:article_id' => 'users#cancel'
 
+  get '/api/clubs/informs/all' => 'clubs#getinform'
   post '/api/clubs/articles/detail/create' => 'articles#create'
 #  post '/api/clubs/articles/detail/:article_id/create_content' => 'articles#create_content'
   post '/api/clubs/articles/detail/:article_id/change' => 'articles#show'

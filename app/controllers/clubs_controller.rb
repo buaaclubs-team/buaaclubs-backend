@@ -5,7 +5,11 @@ class ClubsController < ApplicationController
   skip_before_action :require_club_login, only: [:login, :getabstracts,:exportlist,:clubsactivity,:clublist,:clubsbycategory]
   before_action :set_club, only: [:show, :edit, :update, :destroy]
   
-
+  def returnmm
+      @club = Club.where(club_account: request.headers["uid"]).take
+      
+      render :json => {:club_num => @club.members.size},status: 200
+  end
   def clubsbycategory
       a = []
       #  x = params[:page_id].to_i
@@ -59,7 +63,7 @@ class ClubsController < ApplicationController
        format.html { render :json => {:txt => "Not Record"} ,:status => 404}
        end
     else
-       p.each{|t| a<<{:name => t.name,:head_url => t.head_url,:category => t.category} }
+       p.each{|t| a<<{:name => t.name,:head_url => t.head_url,:category => t.category } }
        respond_to do |format|
                  response.headers['Access-Control-Allow-Origin']="*"
          format.html { render :json=>{:txt => a}.to_json }
@@ -73,7 +77,7 @@ class ClubsController < ApplicationController
   def clubsactivity
     a = []
     x = params[:page_id].to_i
-    @club = Club.where(club_account: request.header["club_account"]).take
+    @club = Club.where(club_account: request.headers["club_account"]).take
     if (x<1)
       respond_to do |format|
         format.html { render :json=>{txt: "page_id minus"}.to_json, :status => 404}
@@ -140,6 +144,7 @@ class ClubsController < ApplicationController
                               :phone_num => @members[t].phone_num,
                               :email => @members[t].email,
                               :user_head => @members[t].user_head,
+                           
                               :time => List.where({club_id: @club.id,user_id: @members[t].id}).take.created_at.localtime.to_s}}
         respond_to do |format|
          format.html { render :json=>{:txt => m}.to_json }
@@ -184,8 +189,8 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
                                 apps << {:uid => @applicants[t].stu_num,
                                       :name => @applicants[t].name,
                                       :user_head => @applicants[t].user_head,
-                                      :time => Application.where(club_id: @club.id,user_id: @applicants[t].id,accept:-1).take.created_at.localtime.to_s,
-                                      :reason => Application.where(club_id: @club.id,user_id: @applicants[t].id,accept: -1).take.reason}
+                                      :time => Application.where(club_id: @club.id,user_id: @applicants[t].id).take.created_at.localtime.to_s,
+                                      :reason => Application.where(club_id: @club.id,user_id: @applicants[t].id).take.reason}
                          
                      }
         respond_to do |format|
@@ -211,7 +216,7 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
                         suc = 1
             #            render text: 'the person already one of club',status: 404
                 end
-                @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: -1}).take
+                @Application = Application.where({club_id: @club.id,user_id: @user.id}).take
                 if @Application.nil?
                         suc = 1
              #           render text: 'Application not exist',status: 404
@@ -250,7 +255,7 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
 			suc = 1
                       #  render text: 'User not exit',status: 404
                 end
-                @Application = Application.where({club_id: @club.id,user_id: @user.id,accept: -1}).take
+                @Application = Application.where({club_id: @club.id,user_id: @user.id}).take
                 if @Application.nil?
 			suc = 1
                        # render text: 'Application not exist',status: 404
@@ -287,6 +292,21 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
 	  UserMailer.inform_email(@club,@article,@information,@user).deliver_now
 	render nothing: true, status: 200
 	}
+  end
+
+  def getinform
+     a = []
+     #puts request.headers[:uid] + "   fgsfgfgsfdgsdfgsfdg"
+     inform = Inform.where(club_id: (Club.find_by club_account: request.headers[:uid]).id).reverse_order
+     puts inform.length 
+     if inform.length==0
+         render text: 'Club not exit',status: 404
+         return
+     end
+      inform.each{|t| a<<{:uids => t.users,:content => t.content,:type => t.type, :time => t.created_at.localtime.to_s} }
+       respond_to do |format|
+         format.html { render :json=>{:txt => a}.to_json , status: 200}
+       end
   end
 
   def sendmessage
@@ -326,20 +346,22 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
     kind =  @content["type"].to_i
     @inform = Inform.new
     @inform.content = @information
+    @inform.users = @content["uids"]
+    @inform.club_id = @club.id
     if kind==0 
       @inform.type = 0
-      @inform.club_id = @club.id
       @content["uids"].each{|uid|
-        @inform.concat(uid)
+        
         @webmail = Webmail.new
         @webmail.sender_id =  @club.id
         @webmail.sender_name = @club.name
-        @webmail.receiver_id = uid
+        @webmail.receiver_id = (User.find_by stu_num: uid).id
         @webmail.receiver_type = 0
         @webmail.content = @information
         @webmail.ifread = 0
+        @webmail.save
       }
-      @inform.users = a.to_json
+      
     else
       if kind == 1
           $LOAD_PATH.unshift(File.dirname(__FILE__)) unless $LOAD_PATH.include?(File.dirname(__FILE__))
@@ -363,16 +385,19 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
             messagexsend.add_var("code", "#{@content["content"]}")
             puts messagexsend.message_xsend()
        }
+         @inform.type = 1
       else
 
           @content["uids"].each{|uid|
             @user = User.find_by stu_num: uid
-            if @user.email_verify ==0
-               render nothing: true, status: 405
-            end         
+           #if @user.email_verify ==0
+            #   render nothing: true, status: 405
+            #end
             UserMailer.inform_email(@club,@information,@user).deliver_now          }
+            @inform.type = 2
       end
     end
+    @inform.save
     render nothing: true, status: 200
   end
  
@@ -387,7 +412,9 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
     @comment.content = @content["content"]
     @comment.reply_id = params[:reply_id]
     if !@comment.save
+      puts @content["content"]
       render nothing: true, status: 400
+      return
     end
     if @comment.reply_id != -1
     @comment =  Comment.find_by sender_id: params[:reply_id].to_i
@@ -415,11 +442,15 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
         render nothing: true, status: 404
     end
     a =[]
-    Webmail.all.each do |webmail|
-       if webmail.receiver_id == @club.id
-         a<<{:webmail_id => webmail.id,:sender_id => webmail.sender_id,:sender_name=>webmail.sender_name, :receiver_id => webmail.receiver_id,:content=>webmail.content,:if_read=>webmail.ifread}
+    web = Webmail.where(receiver_id: @club.id, receiver_type: 1).reverse_order
+    web.each do |webmail|
+       
+         a<<{:webmail_id => webmail.id,:sender_id => webmail.sender_id,:sender_name=>webmail.sender_name, :receiver_id => webmail.receiver_id,:content=>webmail.content,:if_read=>webmail.ifread, :time => webmail.created_at.localtime.to_s}
          #format.html { render :json=>{:txt => a}.to_json }
+       if webmail.ifread==0
+          webmail.ifread=1
        end
+       webmail.save
     end
      render :json=>{:txt=>a}.to_json, status: 200
   end
@@ -446,8 +477,8 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
   def login
     @club = Club.find_by club_account: params[:uid]
     if !@club.nil? and params[:passwd] == @club.password
-      @club.update(log_num: rand(10000000))
-      render :json => {:name => @club.name, :headurl => @club.head_url,:uid => @club.club_account, :token => Digest::MD5.hexdigest("#{@club.club_account + @club.log_num.to_s}")}
+     # @club.update(log_num: rand(10000000))
+      render :json => {:name => @club.name,:category => @club.category, :headurl => @club.head_url,:uid => @club.club_account, :token => Digest::MD5.hexdigest("#{@club.club_account + @club.log_num.to_s}")}
     else
       render nothing: true, status: 401
     end
