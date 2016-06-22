@@ -7,7 +7,7 @@ class UsersController < ApplicationController
  # before_action :set_user, only: [:show, :edit, :update, :destroy]
   skip_before_filter :verify_authenticity_token
   skip_before_action :require_club_login
-  skip_before_action :require_user_login, only: [:register, :login, :checkuid, :detail,:statistics,:verify_phone_sendcode, :verify_phone, :verify_email, :fp_email, :fp_email_verify, :fp_phone_send, :fp_phone_verify, :checkiden]
+  skip_before_action :require_user_login, only: [:register, :login, :checkuid, :detail,:statistics,:verify_phone_sendcode, :verify_phone, :verify_email, :fp_email, :fp_email_verify, :fp_phone_send, :fp_phone_verify, :checkiden, :get_token_for_app]
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 #  require_relative "tongpao"
 #  include Tptokens
@@ -411,20 +411,37 @@ class UsersController < ApplicationController
    
     @user = User.find_by stu_num: params[:uid]
     if !@user.nil? and @user.password == params[:passwd]
-  #    @user.log_num = rand(10000000)
-   #   @user.save
       render :json => {:name => @user.name, :uid => @user.stu_num, :token => Digest::MD5.hexdigest("#{@user.stu_num.to_s + @user.log_num.to_s}"), :user_head => @user.user_head}
     else
       render :json =>  {txt: 'user login failed'}, status: 401
     end
   end
+
+  def get_token_for_app
+    @user = User.find_by stu_num: params[:uid]
+    if @user.nil?
+      @user = User.new
+      @user.name = params[:name]
+      @user.stu_num = params[:uid]
+      @user.phone_num = params[:phone_num]
+      @user.password = "000000"
+      @user.email = params[:email]
+      @user.user_head = "http://7xob9u.com1.z0.glb.clouddn.com/defaultHead.jpg"
+      @user.log_num = rand(10000000)
+      if @user.save
+        render :json => {:token => Digest::MD5.hexdigest("#{@user.stu_num.to_s + @user.log_num.to_s}"), :user_head =>  @user.user_head}
+      else
+        render json: @user.errors, status: :unprocessable_entity
+      end
+    else
+      @user.update(name: params[:name])
+      @user.update(phone_num: params[:phone_num])
+      render :json => {:token => Digest::MD5.hexdigest("#{@user.stu_num.to_s + @user.log_num.to_s}"), :user_head =>  @user.user_head}
+    end
+  end
   
   # GET /api/users/logout
   def logout
-          head = request.headers["uid"]
-          
-          @user = User.where(stu_num: head).take
-          @user.update(log_num: nil)
           respond_to do |format|
             format.html { render nothing: true, :status => 200 }
            

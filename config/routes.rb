@@ -52,6 +52,7 @@ Rails.application.routes.draw do
   post '/api/register' => 'users#register'
   post '/api/clubs/login' => 'clubs#login'
   post '/api/users/login' => 'users#login'
+  post '/api/users/get_token_for_app' => 'users#get_token_for_app'
   get '/api/articles/:page_id/:club_id/:kind' => 'articles#abstracts'
   get '/api/articles/detail/:article_id' => 'articles#detail'
   get '/api/clubs/:uid/articles/:page_id' => 'clubs#getabstracts'

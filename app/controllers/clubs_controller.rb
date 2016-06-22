@@ -477,7 +477,6 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
   def login
     @club = Club.find_by club_account: params[:uid]
     if !@club.nil? and params[:passwd] == @club.password
-     # @club.update(log_num: rand(10000000))
       render :json => {:name => @club.name,:category => @club.category, :headurl => @club.head_url,:uid => @club.club_account, :token => Digest::MD5.hexdigest("#{@club.club_account + @club.log_num.to_s}")}
     else
       render nothing: true, status: 401
@@ -512,11 +511,6 @@ def applicationlist#获取申请人列表，注意是还没有处理的申请人
 
   #GET /api/clubs/logout
   def logout
-          head = request.headers["uid"]
-          Club.where(club_account: head).exists?
-          @club = Club.where(club_account: head).take
-          @club.update(log_num: nil)
-          
           respond_to do |format|
              format.html { render nothing: true,:status => 200 }
           end
